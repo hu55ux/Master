@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-namespace Master;
+namespace Master.Data;
 
 public class MasterDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
 {
