@@ -1,4 +1,5 @@
-﻿using Master.Models;
+﻿using System.Reflection.Emit;
+using Master.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ public class MasterDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Gu
     public DbSet<Skill> Skills => Set<Skill>();
     public DbSet<JobPost> JobPosts => Set<JobPost>();
     public DbSet<UserSkill> UserSkills => Set<UserSkill>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -52,9 +54,27 @@ public class MasterDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Gu
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Entity<JobPost>()
+        .Property(j => j.Budget)
+        .HasColumnType("decimal(18,2)");
+
+        builder.Entity<JobPost>()
             .HasOne(jp => jp.RequiredSkill)
             .WithMany(s => s.JobPosts)
             .HasForeignKey(jp => jp.RequiredSkillId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<JobPost>()
+        .Property(j => j.JPStatus)
+        .HasConversion<string>();
+
+        builder.Entity<RefreshToken>(
+           refresh =>
+           {
+               refresh.HasKey(rt => rt.Id);
+               refresh.HasIndex(rt => rt.JwtId).IsUnique();
+               refresh.Property(rt => rt.JwtId).IsRequired().HasMaxLength(64);
+               refresh.Property(rt => rt.UserId).IsRequired().HasMaxLength(450);
+           }
+           );
     }
 }

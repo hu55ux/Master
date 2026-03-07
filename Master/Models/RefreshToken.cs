@@ -9,8 +9,7 @@ public class RefreshToken
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? RevokedAt { get; set; }
     public string? ReplacedByJwtId { get; set; }
-
     public bool IsRevoked => RevokedAt.HasValue;
-    public bool IsExpired => ExpiresAt <= DateTime.UtcNow;
+    public bool IsExpired => DateTimeOffset.UtcNow >= ExpiresAt;
     public bool IsActive => !IsRevoked && !IsExpired;
 }

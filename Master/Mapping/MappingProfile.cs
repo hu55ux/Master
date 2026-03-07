@@ -23,15 +23,17 @@ public class MappingProfile : Profile
 
         CreateMap<CreateJobPostDTO, JobPost>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
-            .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTime.UtcNow))
-            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
+            .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTime.UtcNow));
 
         CreateMap<UpdateJobPostDTO, JobPost>()
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
         CreateMap<JobPost, JobPostResponseDTO>()
-            .ForMember(dest => dest.SkillId, opt => opt.MapFrom(src => src.RequiredSkillId))
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedDate));
+            .ForMember(dest => dest.RequiredSkillId, opt => opt.MapFrom(src => src.RequiredSkillId))
+            .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.CreatedDate))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.JPStatus.ToString()))
+            .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Customer.UserName))
+            .ForMember(dest => dest.RequiredSkillName, opt => opt.MapFrom(src => src.RequiredSkill.Name));
 
         CreateMap<Skill, SkillResponseDTO>();
 

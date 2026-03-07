@@ -1,4 +1,5 @@
 ﻿using Master.DTOs;
+using Master.Models;
 
 namespace Master.Services;
 
@@ -54,4 +55,11 @@ public interface IAuthService
     /// <returns>A <see cref="AuthResponseDTO"/> indicating the result of the password change operation.</returns>
     /// <exception cref="UnauthorizedAccessException">Thrown if the current password provided in the request is incorrect.</exception>
     Task<AuthResponseDTO> ChangePasswordAsync(Guid id, ChangePasswordRequest request);
+
+    /// <summary>
+    /// Gets user entity
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    Task<AppUser> GetUserEntity(Guid id);
 }

@@ -145,24 +145,23 @@ public static class ServiceCollectionExtensions
                 }
             );
 
-        // Authorization policies
         services.AddAuthorization(
             options =>
             {
                 options.AddPolicy(
-                    "AdminOnly",
+                    AuthPolicies.AdminOnly,
                     policy
-                        => policy.RequireRole("Admin"));
+                        => policy.RequireRole(UserRoles.Admin));
 
                 options.AddPolicy(
-                    "AdminOrManager",
+                    AuthPolicies.MasterOnly,
                     policy
-                        => policy.RequireRole("Admin", "Manager"));
+                        => policy.RequireRole(UserRoles.Master));
 
                 options.AddPolicy(
-                    "UserOrAbove",
+                    AuthPolicies.ClientOnly,
                     policy
-                        => policy.RequireRole("Admin", "Manager", "User"));
+                        => policy.RequireRole(UserRoles.Client));
             });
         return services;
     }
@@ -175,7 +174,9 @@ public static class ServiceCollectionExtensions
         optons.AddDefaultPolicy(
             policy => policy.WithOrigins(
                 "http://localhost:3000",
-                "http://127.0.0.1:3000")
+                "http://127.0.0.1:3000",
+                "http://localhost:5173"
+                )
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials()
