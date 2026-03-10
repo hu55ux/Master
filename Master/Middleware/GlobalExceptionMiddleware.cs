@@ -49,7 +49,7 @@ public class GlobalExceptionMiddleware
             UnauthorizedAccessException =>
             (401, CreateProblemDetails(context, 401, "User unauthorized", ex.Message)),
 
-            _ => (500, CreateProblemDetails(context, 500, "An unxpected error occured", "An unxpected error occured while processing request"))
+            _ => (500, CreateProblemDetails(context, 500, "An unxpected error occured", ex.Message))
         };
 
         context.Response.StatusCode = statusCode;

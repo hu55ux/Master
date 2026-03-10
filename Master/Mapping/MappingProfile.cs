@@ -8,7 +8,11 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         CreateMap<RegisterRequest, AppUser>()
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email));
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email))
+            .ForMember(dest => dest.DateOfBirth, opt => opt.MapFrom(src =>
+                src.DateOfBirth.ToDateTime(TimeOnly.MinValue)))
+            .ForMember(dest => dest.PhoneNumberConfirmed, opt => opt.Ignore());
+
 
         CreateMap<AppUser, AuthResponseDTO>()
             .ForMember(dest => dest.AccessToken, opt => opt.Ignore())

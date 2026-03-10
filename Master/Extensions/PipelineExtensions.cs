@@ -5,7 +5,7 @@ namespace Master.Extensions;
 
 public static class PipelineExtensions
 {
-    public static WebApplication UseTaskFlowPiplene(
+    public static WebApplication UseMasterPiplene(
         this WebApplication app
         )
     {

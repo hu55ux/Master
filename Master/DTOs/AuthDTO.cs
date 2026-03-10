@@ -39,7 +39,7 @@ public class RegisterRequest
     /// Date of Birth of the user. This property is used to store the user's date of birth during 
     /// registration, which can be used for age verification, personalization, or other purposes within the application.
     /// </summary>
-    public DateTimeOffset DateOfBirth { get; set; }
+    public DateOnly DateOfBirth { get; set; }
 
     /// <summary>
     /// Experience of the user. This property is used to store the user's experience level 
@@ -56,6 +56,11 @@ public class RegisterRequest
     /// This property is used to store the physical address of the user during registration.
     /// </summary>
     public string Address { get; set; } = string.Empty;
+
+    /// <summary>
+    /// This property is used to store users role during registration.
+    /// </summary>
+    public string Role { get; set; } = string.Empty;
 }
 
 

@@ -2,25 +2,18 @@ using Master.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddDataContext(builder.Configuration);
-
-
-
+builder.Services
+    .AddSwagger()
+    .AddFluentValidation()
+    .AddDataContext(builder.Configuration)
+    .AddIdentityAndDb(builder.Configuration)
+    .AddJwtAuthenticationAndAuthorization(builder.Configuration)
+    .AddAutoMapperAndOtherServices();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseMasterPiplene();
 
-app.UseAuthorization();
-
-app.MapControllers();
+await app.EnsureRolesSeededAsync();
 
 app.Run();

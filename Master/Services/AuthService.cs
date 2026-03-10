@@ -22,7 +22,7 @@ public class AuthService : IAuthService
 
     private const string RefreshTokenType = "refresh";
     private readonly UserManager<AppUser> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly MasterDbContext _context;
     private readonly JwtConfig _config;
     private readonly IMapper _mapper;
@@ -40,7 +40,7 @@ public class AuthService : IAuthService
         MasterDbContext context,
         IOptions<JwtConfig> config,
         IMapper mapper,
-        RoleManager<IdentityRole> roleManager)
+        RoleManager<IdentityRole<Guid>> roleManager)
     {
         _userManager = userManager;
         _context = context;
@@ -264,30 +264,29 @@ public class AuthService : IAuthService
         {
             throw new InvalidOperationException("A user with this email already exists.");
         }
-        var user = new AppUser
-        {
-            UserName = request.Email,
-            Email = request.Email,
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            PhoneNumber = request.PhoneNumber,
-            Address = request.Address,
-            CreatedAt = DateTimeOffset.UtcNow,
-            UpdatedAt = null
-        };
+
+        var user = _mapper.Map<AppUser>(request);
 
         var result = await _userManager.CreateAsync(user, request.Password);
 
         if (!result.Succeeded)
             throw new InvalidOperationException($"User creation failed: {string.Join(", ", result.Errors.Select(e => e.Description))}");
 
-        const string defaultRole = "User";
-
-        if (!await _roleManager.RoleExistsAsync(defaultRole))
+        string roleToAssign = request.Role switch
         {
-            await _roleManager.CreateAsync(new IdentityRole(defaultRole));
+            "Master" => "Master",
+            _ => "Customer"
+        };
+
+        if (!await _roleManager.RoleExistsAsync(roleToAssign))
+        {
+            await _roleManager.CreateAsync(new IdentityRole<Guid>(roleToAssign));
         }
-        await _userManager.AddToRoleAsync(user, defaultRole);
+
+        var roleResult = await _userManager.AddToRoleAsync(user, roleToAssign);
+
+        if (!roleResult.Succeeded)
+            throw new InvalidOperationException("Failed to assign role to user.");
 
         return await GenerateTokensAsync(user);
     }
@@ -419,5 +418,43 @@ public class AuthService : IAuthService
             throw new KeyNotFoundException($"User with ID {id} was not found.");
 
         return user;
+    }
+
+    public async Task<bool> DeleteOwnProfile(Guid id)
+    {
+        var user = await _context.Users
+            .Include(u => u.UserSkills)
+            .Include(u => u.JobPosts)
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user is null)
+            throw new KeyNotFoundException("User profile not found.");
+
+        if (user.UserSkills.Any()) _context.UserSkills.RemoveRange(user.UserSkills);
+        if (user.JobPosts.Any()) _context.JobPosts.RemoveRange(user.JobPosts);
+
+        await DeleteUserRefreshTokensAsync(id);
+
+        var result = await _userManager.DeleteAsync(user);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new InvalidOperationException($"Failed to delete user: {errors}");
+        }
+
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+    private async Task DeleteUserRefreshTokensAsync(Guid userId)
+    {
+        var tokens = _context.Set<RefreshToken>().Where(t => t.UserId == userId.ToString());
+
+        if (await tokens.AnyAsync())
+        {
+            _context.Set<RefreshToken>().RemoveRange(tokens);
+        }
     }
 }

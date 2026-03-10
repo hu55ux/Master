@@ -98,7 +98,7 @@ public static class ServiceCollectionExtensions
     {
         services.Configure<JwtConfig>(configuration.GetSection(JwtConfig.SectionName));
 
-        services.AddIdentity<AppUser, IdentityRole>(options =>
+        services.AddIdentity<AppUser, IdentityRole<Guid>>(options =>
         {
             options.Password.RequireDigit = false;
             options.Password.RequireLowercase = false;

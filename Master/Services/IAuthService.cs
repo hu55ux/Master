@@ -62,4 +62,11 @@ public interface IAuthService
     /// <param name="id"></param>
     /// <returns></returns>
     Task<AppUser> GetUserEntity(Guid id);
+
+    /// <summary>
+    /// Deleting users profile.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    Task<bool> DeleteOwnProfile(Guid id);
 }
