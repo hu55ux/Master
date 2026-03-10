@@ -9,6 +9,8 @@ namespace Master.Services;
 /// </summary>
 public interface IAuthService
 {
+    Guid UserId { get; }
+
     /// <summary>
     /// Registers a new user in the system and initializes their account.
     /// </summary>

@@ -26,6 +26,19 @@ public class AuthService : IAuthService
     private readonly MasterDbContext _context;
     private readonly JwtConfig _config;
     private readonly IMapper _mapper;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    public Guid UserId
+    {
+        get
+        {
+            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+                throw new UnauthorizedAccessException("User is not authenticated.");
+
+            return Guid.Parse(userId);
+        }
+    }
 
     /// <summary>
     /// Constructor for AuthService, utilizing dependency injection to receive necessary services.
@@ -40,13 +53,15 @@ public class AuthService : IAuthService
         MasterDbContext context,
         IOptions<JwtConfig> config,
         IMapper mapper,
-        RoleManager<IdentityRole<Guid>> roleManager)
+        RoleManager<IdentityRole<Guid>> roleManager,
+        IHttpContextAccessor httpContextAccessor)
     {
         _userManager = userManager;
         _context = context;
         _config = config.Value;
         _mapper = mapper;
         _roleManager = roleManager;
+        _httpContextAccessor = httpContextAccessor;
     }
 
 
@@ -457,4 +472,5 @@ public class AuthService : IAuthService
             _context.Set<RefreshToken>().RemoveRange(tokens);
         }
     }
+
 }

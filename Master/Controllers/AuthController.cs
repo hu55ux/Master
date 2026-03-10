@@ -82,16 +82,9 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<ApiResponse<AuthResponseDTO>>> EditOwnProfile([FromBody] ProfileEditRequest request)
     {
-        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = _authService.UserId;
 
-        if (string.IsNullOrEmpty(userId))
-        {
-            return Unauthorized(ApiResponse<AuthResponseDTO>.ErrorResponse("User identification failed. Please log in again."));
-        }
-
-        var userGuid = Guid.Parse(userId);
-
-        var result = await _authService.EditOwnProfileAsync(userGuid, request);
+        var result = await _authService.EditOwnProfileAsync(userId, request);
 
         if (result == null)
         {
@@ -114,16 +107,9 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<ApiResponse<AuthResponseDTO>>> ChangeOwnPassword([FromBody] ChangePasswordRequest request)
     {
-        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = _authService.UserId;
 
-        if (userId == null)
-        {
-            return Unauthorized(ApiResponse<AuthResponseDTO>.ErrorResponse("User identification failed."));
-        }
-
-        var userGuid = Guid.Parse(userId);
-
-        var result = await _authService.ChangePasswordAsync(userGuid, request);
+        var result = await _authService.ChangePasswordAsync(userId, request);
 
         return Ok(ApiResponse<AuthResponseDTO>.SuccessResponse(result));
     }
@@ -140,16 +126,9 @@ public class AuthController : ControllerBase
     [Authorize]
     public async Task<ActionResult<ApiResponse<string>>> DeleteOwnProfile()
     {
-        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = _authService.UserId;
 
-        if (string.IsNullOrEmpty(userId))
-        {
-            return Unauthorized(ApiResponse<string>.ErrorResponse("User identification failed."));
-        }
-
-        var userGuid = Guid.Parse(userId);
-
-        await _authService.DeleteOwnProfile(userGuid);
+        await _authService.DeleteOwnProfile(userId);
 
         return Ok(ApiResponse<string>.SuccessResponse("Profile permanently deleted.", "Success"));
     }
