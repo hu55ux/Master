@@ -1,4 +1,4 @@
-﻿    using AutoMapper;
+﻿using AutoMapper;
 using Master.Data;
 using Master.DTOs;
 using Master.Models;
@@ -107,6 +107,7 @@ public class JobPostService : IJobPostService
 
         return _mapper.Map<IEnumerable<JobPostResponseDTO>>(jobs);
     }
+
     public async Task<bool> ChangeJobStatusAsync(Guid jobId, Guid clientId, JobPostStatus newStatus)
     {
         var job = await _context.JobPosts
@@ -124,7 +125,6 @@ public class JobPostService : IJobPostService
         await _context.SaveChangesAsync();
         return true;
     }
-
 
     public async Task<IEnumerable<JobPostResponseDTO>> GetMyJobsAsync(Guid clientId)
     {

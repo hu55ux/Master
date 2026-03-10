@@ -37,10 +37,14 @@ public static class PipelineExtensions
 
         return app;
     }
-    public static async Task EnsureRolesSeededAsync(
-        this WebApplication app)
+    public static async Task EnsureSeededAsync(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();
-        await RoleSeeder.SeedRolesAsync(scope.ServiceProvider);
+        var serviceProvider = scope.ServiceProvider;
+
+        // 1️⃣ Roles və default users
+        await RoleSeeder.SeedRolesAsync(serviceProvider);
+        await RoleSeeder.SeedSkillsAndUsersAsync(serviceProvider);
+
     }
 }

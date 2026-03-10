@@ -14,6 +14,6 @@ var app = builder.Build();
 
 app.UseMasterPiplene();
 
-await app.EnsureRolesSeededAsync();
+await app.EnsureSeededAsync();
 
 app.Run();

@@ -1,5 +1,6 @@
 ﻿using Master.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 namespace Master.Data;
 
 /// <summary>
@@ -54,5 +55,117 @@ public static class RoleSeeder
                 await userManager.AddToRoleAsync(admin, "Admin");
             }
         }
+        await CreateRandomUsers(userManager, "Master", 20);
+        await CreateRandomUsers(userManager, "Client", 20);
+
+    }
+    private static async Task CreateRandomUsers(UserManager<AppUser> userManager, string role, int count)
+    {
+        var rand = new Random();
+
+        for (int i = 1; i <= count; i++)
+        {
+            var email = $"{role.ToLower()}{i}@mail.com";
+            var existingUser = await userManager.FindByEmailAsync(email);
+            if (existingUser != null) continue;
+
+            var user = new AppUser
+            {
+                UserName = email,
+                Email = email,
+                FirstName = $"{role}First{i}",
+                LastName = $"{role}Last{i}",
+                Address = $"Street {i}",
+                PhoneNumber = $"+99477{rand.Next(1000000, 9999999)}",
+                EmailConfirmed = true,
+                Experience = (short)rand.Next(0, 10),
+                Age = (short)rand.Next(20, 50),
+                DateOfBirth = DateTimeOffset.UtcNow.AddYears(-(rand.Next(20, 50))),
+                CreatedAt = DateTimeOffset.UtcNow
+            };
+
+            var result = await userManager.CreateAsync(user, "Password123!");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, role);
+            }
+        }
+    }
+    public static async Task SeedSkillsAndUsersAsync(IServiceProvider serviceProvider)
+    {
+        var context = serviceProvider.GetRequiredService<MasterDbContext>();
+        var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
+        var rand = new Random();
+
+        if (!context.Skills.Any())
+        {
+            var skills = new List<Skill>();
+            for (int i = 1; i <= 50; i++)
+            {
+                skills.Add(new Skill
+                {
+                    Name = $"Skill {i}",
+                    Description = $"Description for Skill {i}"
+                });
+            }
+            context.Skills.AddRange(skills);
+            await context.SaveChangesAsync();
+        }
+
+        var skillsList = await context.Skills.ToListAsync();
+
+        var allUsers = userManager.Users.ToList();
+        var masters = new List<AppUser>();
+        var clients = new List<AppUser>();
+
+        foreach (var user in allUsers)
+        {
+            if (await userManager.IsInRoleAsync(user, "Master"))
+                masters.Add(user);
+            else if (await userManager.IsInRoleAsync(user, "Client"))
+                clients.Add(user);
+        }
+
+        if (!masters.Any()) throw new Exception("No Master users found.");
+        if (!clients.Any()) throw new Exception("No Client users found.");
+
+        foreach (var master in masters)
+        {
+            int skillCount = rand.Next(1, 6);
+            var assignedSkills = skillsList.OrderBy(s => rand.Next()).Take(skillCount).ToList();
+
+            foreach (var skill in assignedSkills)
+            {
+                if (!context.UserSkills.Any(us => us.UserId == master.Id && us.SkillId == skill.Id))
+                {
+                    context.UserSkills.Add(new UserSkill
+                    {
+                        UserId = master.Id,
+                        SkillId = skill.Id
+                    });
+                }
+            }
+        }
+
+        foreach (var client in clients)
+        {
+            int jobCount = rand.Next(1, 4); 
+            for (int i = 1; i <= jobCount; i++)
+            {
+                var randomSkill = skillsList[rand.Next(skillsList.Count)];
+                context.JobPosts.Add(new JobPost
+                {
+                    Title = $"Job {i} for {client.FirstName}",
+                    Description = $"Description for Job {i}",
+                    CustomerId = client.Id,
+                    RequiredSkillId = randomSkill.Id,
+                    JPStatus = (JobPostStatus)rand.Next(Enum.GetValues(typeof(JobPostStatus)).Length),
+                    CreatedDate = DateTime.UtcNow.AddDays(-rand.Next(0, 30)),
+                    Budget = rand.Next(100, 5000)
+                });
+            }
+        }
+
+        await context.SaveChangesAsync();
     }
 }

@@ -3,6 +3,7 @@ using Master.DTOs;
 using Master.Services;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc;
+using Master.Models;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -17,7 +18,7 @@ public class JobPostController : ControllerBase
         _authService = authService;
     }
 
-    [HttpGet]
+    [HttpGet("All")]
     public async Task<ActionResult<ApiResponse<IEnumerable<JobPostResponseDTO>>>> GetAll()
     {
         var jobs = await _jobPostService.GetAllJobsAsync();
@@ -36,7 +37,7 @@ public class JobPostController : ControllerBase
         );
     }
 
-    [HttpGet("Get by: {Id}")]
+    [HttpGet("Get by: {id:guid}")]
     public async Task<ActionResult<JobPostResponseDTO>> GetById(Guid id)
     {
         var job = await _jobPostService.GetJobByIdAsync(id);
@@ -47,10 +48,7 @@ public class JobPostController : ControllerBase
         return Ok(ApiResponse<JobPostResponseDTO>.SuccessResponse(job, "Job Post returned successfully!"));
     }
 
-
-
-
-    [HttpPost]
+    [HttpPost("Create")]
     public async Task<ActionResult<ApiResponse<JobPostResponseDTO>>> Create([FromBody] CreateJobPostDTO request)
     {
         if (!ModelState.IsValid)
@@ -80,7 +78,7 @@ public class JobPostController : ControllerBase
     }
 
 
-    [HttpPut("{jobId}")]
+    [HttpPut("{jobId:guid}")]
     public async Task<ActionResult<ApiResponse<JobPostResponseDTO>>> Update(
         Guid jobId,
         [FromBody] UpdateJobPostDTO request)
@@ -111,46 +109,64 @@ public class JobPostController : ControllerBase
         );
     }
 
-    [HttpDelete("{JobId}")]
+    [HttpDelete("{jobId:guid}")]
     public async Task<IActionResult> Delete(Guid jobId)
     {
         var userId = _authService.UserId;
 
         await _jobPostService.DeleteJobAsync(jobId, userId);
 
-        return Ok();
+        return Ok(ApiResponse<object>.SuccessResponse("Job deleted successfully."));
     }
 
+    [HttpGet("activeJP-by-skill{id:guid}")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<JobPostResponseDTO>>>> GetActiveJobsBySkill(Guid skillId)
+    {
+        var result = await _jobPostService.GetActiveJobsBySkillAsync(skillId);
 
+        if (result is null || !result.Any())
+        {
+            return NotFound(
+                ApiResponse<IEnumerable<JobPostResponseDTO>>
+                .ErrorResponse("Jobs not found!")
+            );
+        }
 
+        return Ok(
+            ApiResponse<IEnumerable<JobPostResponseDTO>>
+            .SuccessResponse(result)
+        );
+    }
 
+    [HttpPut("change-status-{id}")]
+    public async Task<IActionResult> ChangeStatus(Guid id, [FromBody] JobPostStatus status)
+    {
+        var userId = _authService.UserId;
 
+        var result = await _jobPostService.ChangeJobStatusAsync(id, userId, status);
 
+        return Ok(ApiResponse<object>.SuccessResponse("Status changed successfully"));
+    }
 
+    [HttpGet("my-jobs")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<JobPostResponseDTO>>>> GetMyJobs()
+    {
+        var userId = _authService.UserId;
+        var result = await _jobPostService.GetMyJobsAsync(userId);
 
+        if (result is null || !result.Any())
+        {
+            return NotFound(
+                ApiResponse<IEnumerable<JobPostResponseDTO>>
+                .ErrorResponse("Jobs not found!")
+            );
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return Ok(
+            ApiResponse<IEnumerable<JobPostResponseDTO>>
+            .SuccessResponse(result)
+        );
+    }
 
     private Dictionary<string, string[]> ToValidationErrors(ModelStateDictionary modelState)
     {
