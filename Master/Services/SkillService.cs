@@ -7,12 +7,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Master.Services;
 
+/// <summary>
+/// Service responsible for managing skills and their assignment to masters.
+/// </summary>
+/// <remarks>
+/// Handles creating, retrieving, updating, and deleting skills, as well as
+/// assigning/removing skills for master users. Includes transaction handling
+/// for bulk updates.
+/// </remarks>
 public class SkillService : ISkillService
 {
     private readonly MasterDbContext _context;
     private readonly IMapper _mapper;
     private readonly UserManager<AppUser> _userManager;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SkillService"/> class.
+    /// </summary>
+    /// <param name="context">Database context used for data access.</param>
+    /// <param name="mapper">AutoMapper instance used for entity mapping.</param>
+    /// <param name="userManager">Identity UserManager for master management.</param>
     public SkillService(MasterDbContext context, IMapper mapper, UserManager<AppUser> userManager)
     {
         _context = context;
@@ -20,16 +34,27 @@ public class SkillService : ISkillService
         _userManager = userManager;
     }
 
+    /// <summary>
+    /// Retrieves a queryable collection of masters including their skills.
+    /// </summary>
+    /// <returns>A queryable collection of <see cref="AppUser"/> with their skills.</returns>
     private IQueryable<AppUser> GetMastersWithSkills()
-    {
-        return _context.Users.Include(u => u.UserSkills);
-    }
+        => _context.Users.Include(u => u.UserSkills);
 
+    /// <summary>
+    /// Retrieves a queryable collection of skills including assigned users.
+    /// </summary>
+    /// <returns>A queryable collection of <see cref="Skill"/> with related users.</returns>
     private IQueryable<Skill> GetSkillsWithIncludes()
-    {
-        return _context.Skills.Include(s => s.UserSkills).ThenInclude(us => us.User);
-    }
+        => _context.Skills.Include(s => s.UserSkills).ThenInclude(us => us.User);
 
+    /// <summary>
+    /// Creates a new skill in the system. Validates that a skill with the same name does not already exist before creation. 
+    /// Maps the incoming DTO to a Skill entity, saves it to the database, and returns a SkillResponseDTO of the created skill.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     public async Task<SkillResponseDTO> CreateSkillAsync(CreateSkillDTO request)
     {
         var nameExists = await _context.Skills
@@ -45,20 +70,35 @@ public class SkillService : ISkillService
         return _mapper.Map<SkillResponseDTO>(newSkill);
     }
 
+    /// <summary>
+    /// Gets a list of all skills in the system. Maps the skill entities to a collection of SkillResponseDTOs for return.
+    /// </summary>
+    /// <returns></returns>
     public async Task<IEnumerable<SkillResponseDTO>> GetAllSkillsAsync()
     {
         var skills = await _context.Skills.AsNoTracking().ToListAsync();
         return _mapper.Map<IEnumerable<SkillResponseDTO>>(skills);
     }
 
+    /// <summary>
+    /// Gets a skill by its ID. Throws a KeyNotFoundException if the skill does not exist.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="KeyNotFoundException"></exception>
     public async Task<SkillResponseDTO> GetSkillByIdAsync(Guid id)
     {
         var skill = await _context.Skills.AsNoTracking().FirstOrDefaultAsync(s => s.Id == id);
-        if (skill is null) throw new KeyNotFoundException("Skill not found.");
+        if (skill == null) throw new KeyNotFoundException("Skill not found.");
 
         return _mapper.Map<SkillResponseDTO>(skill);
     }
 
+    /// <summary>
+    /// Gets a list of masters who have a specific skill by querying the UserSkills table and including related user data. Maps the result to a collection of AuthResponseDTOs.
+    /// </summary>
+    /// <param name="skillId"></param>
+    /// <returns></returns>
     public async Task<IEnumerable<AuthResponseDTO>> GetMastersBySkillAsync(Guid skillId)
     {
         var masters = await _context.UserSkills
@@ -71,6 +111,13 @@ public class SkillService : ISkillService
         return _mapper.Map<IEnumerable<AuthResponseDTO>>(masters);
     }
 
+    /// <summary>
+    /// Assigns a list of skills to a master by creating associations in the UserSkills table.
+    /// </summary>
+    /// <param name="masterId"></param>
+    /// <param name="skillIds"></param>
+    /// <returns></returns>
+    /// <exception cref="KeyNotFoundException"></exception>
     public async Task<bool> AssignSkillsToMasterAsync(Guid masterId, List<Guid> skillIds)
     {
         var master = await _userManager.FindByIdAsync(masterId.ToString());
@@ -100,6 +147,12 @@ public class SkillService : ISkillService
         return true;
     }
 
+    /// <summary>
+    /// Updates the skills assigned to a master by replacing existing associations with a new list of skill IDs.
+    /// </summary>
+    /// <param name="masterId"></param>
+    /// <param name="newSkillIds"></param>
+    /// <returns></returns>
     public async Task<bool> UpdateMasterSkillsAsync(Guid masterId, List<Guid> newSkillIds)
     {
         using var transaction = await _context.Database.BeginTransactionAsync();
@@ -108,7 +161,7 @@ public class SkillService : ISkillService
             var master = await GetMastersWithSkills()
                 .FirstOrDefaultAsync(u => u.Id == masterId);
 
-            if (master is null) throw new KeyNotFoundException("Master not found.");
+            if (master == null) throw new KeyNotFoundException("Master not found.");
 
             _context.UserSkills.RemoveRange(master.UserSkills);
 
@@ -120,7 +173,7 @@ public class SkillService : ISkillService
             var newUserSkills = validIds.Select(id => new UserSkill { UserId = masterId, SkillId = id }).ToList();
 
             await _context.UserSkills.AddRangeAsync(newUserSkills);
-            master.UpdatedAt = DateTime.UtcNow;
+            master.UpdatedAt = DateTimeOffset.UtcNow;
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -133,34 +186,55 @@ public class SkillService : ISkillService
         }
     }
 
+    /// <summary>
+    /// Removes a specific skill from a master. Validates that the master and skill association exists before removal.
+    /// </summary>
+    /// <param name="masterId"></param>
+    /// <param name="skillId"></param>
+    /// <returns></returns>
+    /// <exception cref="KeyNotFoundException"></exception>
     public async Task<bool> RemoveSkillFromMasterAsync(Guid masterId, Guid skillId)
     {
         var master = await GetMastersWithSkills()
             .FirstOrDefaultAsync(u => u.Id == masterId);
 
-        if (master is null) throw new KeyNotFoundException("Master not found.");
+        if (master == null) throw new KeyNotFoundException("Master not found.");
 
         var removingSkill = master.UserSkills.FirstOrDefault(s => s.SkillId == skillId);
-        if (removingSkill is not null)
+        if (removingSkill != null)
         {
             _context.UserSkills.Remove(removingSkill);
-            master.UpdatedAt = DateTime.UtcNow;
+            master.UpdatedAt = DateTimeOffset.UtcNow;
             await _context.SaveChangesAsync();
             return true;
         }
+
         return false;
     }
 
+    /// <summary>
+    /// Updates the details of an existing skill. Validates that the skill exists before applying updates.
+    /// </summary>
+    /// <param name="skillId"></param>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    /// <exception cref="KeyNotFoundException"></exception>
     public async Task<SkillResponseDTO> UpdateSkillAsync(Guid skillId, UpdateSkillDTO request)
     {
         var skill = await _context.Skills.FindAsync(skillId);
-        if (skill is null) throw new KeyNotFoundException("Skill not found.");
+        if (skill == null) throw new KeyNotFoundException("Skill not found.");
 
         _mapper.Map(request, skill);
         await _context.SaveChangesAsync();
         return _mapper.Map<SkillResponseDTO>(skill);
     }
 
+    /// <summary>
+    /// Gets a skill entity by its ID, including related user skills. Throws an exception if the skill is not found.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="KeyNotFoundException"></exception>
     public async Task<Skill> GetSkillEntity(Guid id)
     {
         return await GetSkillsWithIncludes().FirstOrDefaultAsync(s => s.Id == id)

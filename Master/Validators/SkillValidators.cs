@@ -1,30 +1,48 @@
 ﻿using FluentValidation;
 using Master.DTOs;
-using Master.Models;
 
-namespace Master.Validators;
-
-public class CreateSkillValidator : AbstractValidator<CreateSkillDTO>
+namespace Master.Validators
 {
-    public CreateSkillValidator()
+    /// <summary>
+    /// Validator for <see cref="CreateSkillDTO"/>.
+    /// Ensures the skill's name and description meet minimum requirements.
+    /// </summary>
+    public class CreateSkillValidator : AbstractValidator<CreateSkillDTO>
     {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("Skill name is required")
-            .MinimumLength(2).WithMessage("Skill name must be at least 2 characters long");
-        RuleFor(x => x.Description)
-            .NotEmpty().WithMessage("Skill description is required")
-            .MinimumLength(10).WithMessage("Skill description must be at least 10 characters long");
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CreateSkillValidator"/> class.
+        /// </summary>
+        public CreateSkillValidator()
+        {
+            RuleFor(x => x.Name)
+                .NotEmpty().WithMessage("Skill name is required.")
+                .MinimumLength(2).WithMessage("Skill name must be at least 2 characters long.");
+
+            RuleFor(x => x.Description)
+                .NotEmpty().WithMessage("Skill description is required.")
+                .MinimumLength(10).WithMessage("Skill description must be at least 10 characters long.");
+        }
     }
-}
-public class UpdateSkillValidator : AbstractValidator<UpdateSkillDTO>
-{
-    public UpdateSkillValidator()
+
+    /// <summary>
+    /// Validator for <see cref="UpdateSkillDTO"/>.
+    /// Ensures the skill's name and description meet minimum requirements.
+    /// </summary>
+    public class UpdateSkillValidator : AbstractValidator<UpdateSkillDTO>
     {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("Skill name is required")
-            .MinimumLength(2).WithMessage("Skill name must be at least 2 characters long");
-        RuleFor(x => x.Description)
-            .NotEmpty().WithMessage("Skill description is required")
-            .MinimumLength(10).WithMessage("Skill description must be at least 10 characters long");
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UpdateSkillValidator"/> class.
+        /// </summary>
+        public UpdateSkillValidator()
+        {
+            // Reuse rules for consistency
+            RuleFor(x => x.Name)
+                .NotEmpty().WithMessage("Skill name is required.")
+                .MinimumLength(2).WithMessage("Skill name must be at least 2 characters long.");
+
+            RuleFor(x => x.Description)
+                .NotEmpty().WithMessage("Skill description is required.")
+                .MinimumLength(10).WithMessage("Skill description must be at least 10 characters long.");
+        }
     }
 }

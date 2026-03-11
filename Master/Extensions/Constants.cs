@@ -1,16 +1,49 @@
-﻿namespace Master.Extensions;
-
-public static class UserRoles
+﻿namespace Master.Extensions
 {
-    public const string Admin = "Admin";
-    public const string User = "User";
-    public const string Master = "Master";
-    public const string Client = "Client";
-}
+    /// <summary>
+    /// Defines application roles used for authentication and authorization.
+    /// </summary>
+    public static class UserRoles
+    {
+        /// <summary>
+        /// Administrator role.
+        /// </summary>
+        public const string Admin = "Admin";
 
-public static class AuthPolicies
-{
-    public const string AdminOnly = "AdminOnly";
-    public const string MasterOnly = "MasterOnly";
-    public const string ClientOnly = "ClientOnly";
+        /// <summary>
+        /// Standard user role.
+        /// </summary>
+        public const string User = "User";
+
+        /// <summary>
+        /// Master (service provider) role.
+        /// </summary>
+        public const string Master = "Master";
+
+        /// <summary>
+        /// Client (job requester) role.
+        /// </summary>
+        public const string Client = "Client";
+    }
+
+    /// <summary>
+    /// Defines authorization policies for controlling access based on roles.
+    /// </summary>
+    public static class AuthPolicies
+    {
+        /// <summary>
+        /// Policy that allows only administrators.
+        /// </summary>
+        public const string AdminOnly = "AdminOnly";
+
+        /// <summary>
+        /// Policy that allows only masters (service providers).
+        /// </summary>
+        public const string MasterOnly = "MasterOnly";
+
+        /// <summary>
+        /// Policy that allows only clients (job requesters).
+        /// </summary>
+        public const string ClientOnly = "ClientOnly";
+    }
 }

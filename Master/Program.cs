@@ -12,7 +12,7 @@ builder.Services
 
 var app = builder.Build();
 
-app.UseMasterPiplene();
+app.UseMasterPipeline();
 
 await app.EnsureSeededAsync();
 
