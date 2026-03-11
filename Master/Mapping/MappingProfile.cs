@@ -36,8 +36,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.RequiredSkillId, opt => opt.MapFrom(src => src.RequiredSkillId))
             .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.CreatedDate))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.JPStatus.ToString()))
-            .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Customer.UserName))
-            .ForMember(dest => dest.RequiredSkillName, opt => opt.MapFrom(src => src.RequiredSkill.Name));
+            .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Customer!.UserName))
+            .ForMember(dest => dest.RequiredSkillName, opt => opt.MapFrom(src => src.RequiredSkill!.Name));
 
         CreateMap<Skill, SkillResponseDTO>();
 
@@ -46,6 +46,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.UserSkills, opt => opt.Ignore())
             .ForMember(dest => dest.JobPosts, opt => opt.Ignore());
 
-        CreateMap<UpdateSkillDTO, Skill>();
+        CreateMap<UpdateSkillDTO, Skill>()
+             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
     }
 }

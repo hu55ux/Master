@@ -32,12 +32,14 @@ public class JobPostService : IJobPostService
 
     public async Task<JobPostResponseDTO?> GetJobByIdAsync(Guid id)
     {
-        var job = await GetJobPostsWithIncludes()
-            .AsNoTracking()
-            .FirstOrDefaultAsync(j => j.Id == id);
+        var job = await _context.JobPosts
+        .AsNoTracking()
+        .FirstOrDefaultAsync(j => j.Id == id);
 
         if (job is null)
-            throw new KeyNotFoundException($"Job not found: {id}");
+        {
+            throw new KeyNotFoundException($"Job with ID '{id}' was not found in our records.");
+        }
 
         return _mapper.Map<JobPostResponseDTO>(job);
     }
@@ -58,6 +60,7 @@ public class JobPostService : IJobPostService
         var job = _mapper.Map<JobPost>(request);
 
         job.CustomerId = clientId;
+        job.JPStatus = JobPostStatus.Active;
 
         _context.JobPosts.Add(job);
         await _context.SaveChangesAsync();
@@ -74,7 +77,7 @@ public class JobPostService : IJobPostService
             .FirstOrDefaultAsync(j => j.Id == jobId && j.CustomerId == clientId);
 
         if (job is null)
-            throw new KeyNotFoundException($"Job posting not found or you do not have permission to delete: {jobId}");
+            throw new KeyNotFoundException($"Job posting not found or you do not have permission to delete this job.");
 
         _context.JobPosts.Remove(job);
         await _context.SaveChangesAsync();
@@ -89,8 +92,21 @@ public class JobPostService : IJobPostService
         if (job is null)
             throw new KeyNotFoundException($"Job not found: {jobId}");
 
+        if (request.RequiredSkillId.HasValue && request.RequiredSkillId != Guid.Empty)
+        {
+            var skillExists = await _context.Skills.AnyAsync(s => s.Id == request.RequiredSkillId.Value);
+            if (!skillExists)
+                throw new KeyNotFoundException("Specified Skill ID does not exist.");
+        }
+
         _mapper.Map(request, job);
+
         await _context.SaveChangesAsync();
+
+        if (job.RequiredSkillId != Guid.Empty)
+        {
+            await _context.Entry(job).Reference(j => j.RequiredSkill).LoadAsync();
+        }
 
         return _mapper.Map<JobPostResponseDTO>(job);
     }
@@ -121,9 +137,15 @@ public class JobPostService : IJobPostService
             throw new InvalidOperationException("Cannot change status of a completed or canceled job.");
         }
 
+        if (job.JPStatus == newStatus)
+        {
+            return true;
+        }
+
         job.JPStatus = newStatus;
-        await _context.SaveChangesAsync();
-        return true;
+
+        var affectedRows = await _context.SaveChangesAsync();
+        return affectedRows > 0;
     }
 
     public async Task<IEnumerable<JobPostResponseDTO>> GetMyJobsAsync(Guid clientId)

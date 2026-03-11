@@ -9,9 +9,9 @@ public class JobPost
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public JobPostStatus JPStatus { get; set; } = JobPostStatus.Pending;
     public Guid CustomerId { get; set; }
-    public AppUser Customer { get; set; }
+    public AppUser? Customer { get; set; }
     public Guid RequiredSkillId { get; set; }
-    public Skill RequiredSkill { get; set; }
+    public Skill? RequiredSkill { get; set; }
 }
 
 public enum JobPostStatus

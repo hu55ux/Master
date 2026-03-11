@@ -37,8 +37,8 @@ public class JobPostController : ControllerBase
         );
     }
 
-    [HttpGet("Get by: {id:guid}")]
-    public async Task<ActionResult<JobPostResponseDTO>> GetById(Guid id)
+    [HttpGet("get by:{id:guid}")]
+    public async Task<ActionResult<ApiResponse<JobPostResponseDTO>>> GetById(Guid id)
     {
         var job = await _jobPostService.GetJobByIdAsync(id);
 
@@ -78,7 +78,7 @@ public class JobPostController : ControllerBase
     }
 
 
-    [HttpPut("{jobId:guid}")]
+    [HttpPut("update/{jobId:guid}")]
     public async Task<ActionResult<ApiResponse<JobPostResponseDTO>>> Update(
         Guid jobId,
         [FromBody] UpdateJobPostDTO request)
@@ -109,7 +109,7 @@ public class JobPostController : ControllerBase
         );
     }
 
-    [HttpDelete("{jobId:guid}")]
+    [HttpDelete("delete/{jobId:guid}")]
     public async Task<IActionResult> Delete(Guid jobId)
     {
         var userId = _authService.UserId;
@@ -119,7 +119,7 @@ public class JobPostController : ControllerBase
         return Ok(ApiResponse<object>.SuccessResponse("Job deleted successfully."));
     }
 
-    [HttpGet("activeJP-by-skill{id:guid}")]
+    [HttpGet("activeJP-by-skill{skillId:guid}")]
     public async Task<ActionResult<ApiResponse<IEnumerable<JobPostResponseDTO>>>> GetActiveJobsBySkill(Guid skillId)
     {
         var result = await _jobPostService.GetActiveJobsBySkillAsync(skillId);
@@ -138,14 +138,24 @@ public class JobPostController : ControllerBase
         );
     }
 
-    [HttpPut("change-status-{id}")]
-    public async Task<IActionResult> ChangeStatus(Guid id, [FromBody] JobPostStatus status)
+    [HttpPatch("{id}/status")]
+    public async Task<IActionResult> ChangeStatus(Guid id, [FromBody] string status)
     {
         var userId = _authService.UserId;
 
-        var result = await _jobPostService.ChangeJobStatusAsync(id, userId, status);
+        if (!TryParseJobStatus(status, out JobPostStatus parsedStatus))
+        {
+            return BadRequest(ApiResponse<object>.ErrorResponse("Invalid status value. Allowed: Active, Completed, Canceled, etc."));
+        }
+
+        var result = await _jobPostService.ChangeJobStatusAsync(id, userId, parsedStatus);
 
         return Ok(ApiResponse<object>.SuccessResponse("Status changed successfully"));
+    }
+
+    private bool TryParseJobStatus(string status, out JobPostStatus result)
+    {
+        return Enum.TryParse<JobPostStatus>(status, true, out result) && Enum.IsDefined(typeof(JobPostStatus), result);
     }
 
     [HttpGet("my-jobs")]
