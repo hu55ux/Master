@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Master.Common;
 using Master.Data;
 using Master.DTOs;
 using Master.Models;
@@ -195,21 +196,21 @@ public class SkillService : ISkillService
     /// <exception cref="KeyNotFoundException"></exception>
     public async Task<bool> RemoveSkillFromMasterAsync(Guid masterId, Guid skillId)
     {
-        var master = await GetMastersWithSkills()
-            .FirstOrDefaultAsync(u => u.Id == masterId);
+        var userSkill = await _context.UserSkills
+            .FirstOrDefaultAsync(x => x.UserId == masterId && x.SkillId == skillId);
 
-        if (master == null) throw new KeyNotFoundException("Master not found.");
+        if (userSkill == null)
+            return false;
 
-        var removingSkill = master.UserSkills.FirstOrDefault(s => s.SkillId == skillId);
-        if (removingSkill != null)
-        {
-            _context.UserSkills.Remove(removingSkill);
+        _context.UserSkills.Remove(userSkill);
+
+        var master = await _context.Users.FindAsync(masterId);
+        if (master != null)
             master.UpdatedAt = DateTimeOffset.UtcNow;
-            await _context.SaveChangesAsync();
-            return true;
-        }
 
-        return false;
+        await _context.SaveChangesAsync();
+
+        return true;
     }
 
     /// <summary>
@@ -239,5 +240,63 @@ public class SkillService : ISkillService
     {
         return await GetSkillsWithIncludes().FirstOrDefaultAsync(s => s.Id == id)
                ?? throw new KeyNotFoundException("Skill not found.");
+    }
+
+    /// <summary>
+    /// Gets paginated result.
+    /// </summary>
+    /// <param name="query"></param>
+    /// <returns></returns>
+    public async Task<PagedResult<SkillResponseDTO>> GetPagedAsync(SkillQuery query)
+    {
+        query.Validate();
+
+        var skillQuery = GetSkillsWithIncludes();
+
+        if (!string.IsNullOrEmpty(query.SearchTerm))
+        {
+            var searchTerm = query.SearchTerm.Trim().ToLower();
+
+            skillQuery = skillQuery.Where(
+                q => q.Name.ToLower().Contains(searchTerm) ||
+                q.Description.ToLower().Contains(searchTerm)
+                );
+        }
+
+        if (!string.IsNullOrEmpty(query.Sort))
+        {
+            skillQuery = ApplySorting(skillQuery, query.Sort, query.SortDirection);
+        }
+
+        else
+        {
+            skillQuery = skillQuery.OrderByDescending(c => c.Name);
+        }
+        var totalCount = await skillQuery.CountAsync();
+        var skip = (query.Page - 1) * query.PageSize;
+        var customers = await skillQuery
+                                    .Skip(skip)
+                                    .Take(query.PageSize)
+                                    .ToListAsync();
+
+        var skillDTO = _mapper.Map<IEnumerable<SkillResponseDTO>>(customers);
+
+        return PagedResult<SkillResponseDTO>.Create(
+            skillDTO,
+            query.Page,
+            query.PageSize,
+            totalCount
+            );
+
+    }
+    private IQueryable<Skill> ApplySorting(IQueryable<Skill> query, string sort, string sortDirection)
+    {
+        var isDescending = sortDirection?.ToLower() == "desc";
+        return sort.ToLower() switch
+        {
+            "title" => isDescending ? query.OrderByDescending(c => c.Name) : query.OrderBy(c => c.Name),
+            "description" => isDescending ? query.OrderByDescending(c => c.Description) : query.OrderBy(c => c.Description),
+            _ => query.OrderByDescending(c => c.Name)
+        };
     }
 }

@@ -3,14 +3,13 @@ using Master.DTOs;
 using Master.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.Extensions.Configuration.UserSecrets;
+
 namespace Master.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 public class SkillController : ControllerBase
 {
-
     private readonly ISkillService _skillService;
     private readonly IAuthService _authService;
 
@@ -20,35 +19,34 @@ public class SkillController : ControllerBase
         _authService = authService;
     }
 
-    [HttpGet("All")]
+    [HttpGet("all")]
     public async Task<ActionResult<ApiResponse<IEnumerable<SkillResponseDTO>>>> GetAll()
     {
         var skills = await _skillService.GetAllSkillsAsync();
-
-        if (skills is null || !skills.Any())
-        {
-            return NotFound(
-                ApiResponse<IEnumerable<JobPostResponseDTO>>
-                .ErrorResponse("Skills not found!")
-            );
-        }
 
         return Ok(
             ApiResponse<IEnumerable<SkillResponseDTO>>
             .SuccessResponse(skills, "Skills retrieved successfully."));
     }
 
-    [HttpGet("byID/{skillId}")]
+
+    /// <summary>
+    /// Getting filtered results
+    /// </summary>
+    /// <param name="query"></param>
+    /// <returns></returns>
+    [HttpGet("paged")]
+    public async Task<ActionResult<ApiResponse<PagedResult<SkillResponseDTO>>>> GetPaged([FromQuery] SkillQuery query)
+    {
+        var skills = await _skillService.GetPagedAsync(query);
+
+        return Ok(ApiResponse<PagedResult<SkillResponseDTO>>.SuccessResponse(skills, "Jobs returned successfully."));
+    }
+
+    [HttpGet("{skillId}")]
     public async Task<ActionResult<ApiResponse<SkillResponseDTO>>> GetSkillById(Guid skillId)
     {
         var skill = await _skillService.GetSkillByIdAsync(skillId);
-
-        if (skill is null)
-        {
-            return NotFound(
-                ApiResponse<object>
-                .ErrorResponse("Skill not found by your Id"));
-        }
 
         return Ok(
             ApiResponse<SkillResponseDTO>
@@ -68,53 +66,54 @@ public class SkillController : ControllerBase
 
         var result = await _skillService.CreateSkillAsync(request);
 
-        if (result == null)
-        {
-            return BadRequest(
-                ApiResponse<SkillResponseDTO>
-                .ErrorResponse("Skill could not be created")
-            );
-        }
-
         return Ok(
             ApiResponse<SkillResponseDTO>
-            .SuccessResponse(result, "skill created successfully")
-        );
+            .SuccessResponse(result, "Skill created successfully"));
     }
 
-    [HttpDelete("remove/{skillId}")]
-    public async Task<ActionResult<ApiResponse<SkillResponseDTO>> DeleteSkill(Guid skillId)
+    [HttpDelete("{skillId}")]
+    public async Task<ActionResult<ApiResponse<object>>> DeleteSkill(Guid skillId)
     {
         var userId = _authService.UserId;
 
-        var skill = await _skillService.RemoveSkillFromMasterAsync(userId, skillId);
+        var removed = await _skillService.RemoveSkillFromMasterAsync(userId, skillId);
+
+        if (!removed)
+            return NotFound(ApiResponse<object>.ErrorResponse("Skill not found."));
+
+        return Ok(ApiResponse<object>.SuccessResponse("Skill deleted successfully"));
     }
 
+    [HttpGet("mastersBySkill")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<AuthResponseDTO>>>> GetMastersBySkill(Guid skillId)
+    {
+        var masters = await _skillService.GetMastersBySkillAsync(skillId);
 
+        return Ok(
+            ApiResponse<IEnumerable<AuthResponseDTO>>
+            .SuccessResponse(masters, "Masters retrieved successfully."));
+    }
 
+    [HttpPost("assignSkills")]
+    public async Task<IActionResult> AssignSkillsToMaster([FromQuery] List<Guid> skillIds)
+    {
+        var userId = _authService.UserId;
 
+        await _skillService.AssignSkillsToMasterAsync(userId, skillIds);
 
+        return Ok(ApiResponse<object>.SuccessResponse("Skill assigning finished."));
+    }
 
+    [HttpPut("updateMasterSkills")]
+    public async Task<IActionResult> UpdateMasterSkills([FromQuery] List<Guid> newSkillIds)
+    {
+        var userId = _authService.UserId;
 
+        await _skillService.UpdateMasterSkillsAsync(userId, newSkillIds);
 
+        return Ok(ApiResponse<object>.SuccessResponse("Skill updating finished."));
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /// <summary>
-    /// Converts ModelState validation errors into a dictionary format.
-    /// </summary>
     private Dictionary<string, string[]> ToValidationErrors(ModelStateDictionary modelState)
     {
         return modelState
@@ -124,6 +123,4 @@ public class SkillController : ControllerBase
                 kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
             );
     }
-
-
 }

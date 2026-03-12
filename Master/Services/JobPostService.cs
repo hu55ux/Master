@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Master.Common;
 using Master.Data;
 using Master.DTOs;
 using Master.Models;
@@ -50,7 +51,7 @@ public class JobPostService : IJobPostService
     /// <param name="id"></param>
     /// <returns></returns>
     /// <exception cref="KeyNotFoundException"></exception>
-    public async Task<JobPostResponseDTO> GetJobByIdAsync(Guid id)
+    public async Task<JobPostResponseDTO?> GetJobByIdAsync(Guid id)
     {
         var job = await GetJobPostsWithIncludes()
             .AsNoTracking()
@@ -233,5 +234,74 @@ public class JobPostService : IJobPostService
         return _context.JobPosts
             .Include(j => j.Customer)
             .Include(j => j.RequiredSkill);
+    }
+
+    /// <summary>
+    /// Gets pagination and filtered result.
+    /// </summary>
+    /// <param name="query"></param>
+    /// <returns></returns>
+    public async Task<PagedResult<JobPostResponseDTO>> GetPagedAsync(JobPostQuery query)
+    {
+        query.Validate();
+
+        var jpQuery = GetJobPostsWithIncludes();
+
+        if (!string.IsNullOrWhiteSpace(query.Status))
+        {
+            if (Enum.TryParse<JobPostStatus>(query.Status, out var status))
+            {
+                jpQuery = jpQuery.Where(t => t.JPStatus == status);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(query.SearchTerm))
+        {
+            var searchTerm = query.SearchTerm.Trim().ToLower();
+
+            jpQuery = jpQuery.Where(
+                q => q.Title.ToLower().Contains(searchTerm) ||
+                q.Description.ToLower().Contains(searchTerm)
+                );
+        }
+
+        if (!string.IsNullOrEmpty(query.Sort))
+        {
+            jpQuery = ApplySorting(jpQuery, query.Sort, query.SortDirection);
+        }
+
+        else
+        {
+            jpQuery = jpQuery.OrderByDescending(c => c.Title);
+        }
+        var totalCount = await jpQuery.CountAsync();
+        var skip = (query.Page - 1) * query.PageSize;
+        var customers = await jpQuery
+                                    .Skip(skip)
+                                    .Take(query.PageSize)
+                                    .ToListAsync();
+
+        var customerDTO = _mapper.Map<IEnumerable<JobPostResponseDTO>>(customers);
+
+        return PagedResult<JobPostResponseDTO>.Create(
+            customerDTO,
+            query.Page,
+            query.PageSize,
+            totalCount
+            );
+
+    }
+    private IQueryable<JobPost> ApplySorting(IQueryable<JobPost> query, string sort, string sortDirection)
+    {
+        var isDescending = sortDirection?.ToLower() == "desc";
+        return sort.ToLower() switch
+        {
+            "title" => isDescending ? query.OrderByDescending(c => c.Title) : query.OrderBy(c => c.Title),
+            "description" => isDescending ? query.OrderByDescending(c => c.Description) : query.OrderBy(c => c.Description),
+            "budget" => isDescending ? query.OrderByDescending(c => c.Budget) : query.OrderBy(c => c.Budget),
+            "createtdate" => isDescending ? query.OrderByDescending(c => c.CreatedDate) : query.OrderBy(c => c.CreatedDate),
+            "status" => isDescending ? query.OrderByDescending(c => c.JPStatus) : query.OrderBy(c => c.JPStatus),
+            _ => query.OrderByDescending(c => c.Title)
+        };
     }
 }

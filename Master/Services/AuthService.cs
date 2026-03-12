@@ -64,7 +64,6 @@ public class AuthService : IAuthService
         _httpContextAccessor = httpContextAccessor;
     }
 
-
     /// <summary>
     /// Authenticates a user based on provided credentials and generates a session token.
     /// </summary>

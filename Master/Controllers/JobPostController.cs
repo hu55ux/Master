@@ -51,11 +51,24 @@ public class JobPostController : ControllerBase
     }
 
     /// <summary>
+    /// Getting filtered results
+    /// </summary>
+    /// <param name="query"></param>
+    /// <returns></returns>
+    [HttpGet("paged")]
+    public async Task<ActionResult<ApiResponse<PagedResult<JobPostResponseDTO>>>> GetPaged([FromQuery] JobPostQuery query)
+    {
+        var jobs = await _jobPostService.GetPagedAsync(query);
+
+        return Ok(ApiResponse<PagedResult<JobPostResponseDTO>>.SuccessResponse(jobs, "Jobs returned successfully."));
+    }
+
+    /// <summary>
     /// Retrieves a specific job post by its ID.
     /// </summary>
     /// <param name="id">The unique identifier of the job post.</param>
     /// <returns>The requested job post.</returns>
-    [HttpGet("get by:{id:guid}")]
+    [HttpGet("{id:guid}")]
     public async Task<ActionResult<ApiResponse<JobPostResponseDTO>>> GetById(Guid id)
     {
         var job = await _jobPostService.GetJobByIdAsync(id);
