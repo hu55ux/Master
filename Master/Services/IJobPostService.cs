@@ -1,4 +1,5 @@
-﻿using Master.DTOs;
+﻿using Master.Common;
+using Master.DTOs;
 using Master.Models;
 
 namespace Master.Services;
@@ -17,6 +18,13 @@ public interface IJobPostService
     /// </summary>
     /// <returns>A collection of job post response DTOs.</returns>
     Task<IEnumerable<JobPostResponseDTO>> GetAllJobsAsync();
+
+    /// <summary>
+    /// Gets filtered result
+    /// </summary>
+    /// <param name="query"></param>
+    /// <returns></returns>
+    Task<PagedResult<JobPostResponseDTO>> GetPagedAsync(JobPostQuery query);
 
     /// <summary>
     /// Retrieves a specific job post by its identifier.

@@ -45,5 +45,15 @@
         /// Policy that allows only clients (job requesters).
         /// </summary>
         public const string ClientOnly = "ClientOnly";
+
+        /// <summary>
+        /// Policy that allows only masters and admin
+        /// </summary>
+        public const string MasterOrAdmin = "MasterOrAdmin";
+
+        /// <summary>
+        /// Policy that allows only clients or admin
+        /// </summary>
+        public const string ClientOrAdmin = "ClientOrAdmin";
     }
 }

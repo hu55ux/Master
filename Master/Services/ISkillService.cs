@@ -1,5 +1,6 @@
 ﻿namespace Master.Services;
 
+using Master.Common;
 using Master.DTOs;
 using Master.Models;
 
@@ -17,6 +18,13 @@ public interface ISkillService
     /// </summary>
     /// <returns>A collection of skill response DTOs.</returns>
     Task<IEnumerable<SkillResponseDTO>> GetAllSkillsAsync();
+
+    /// <summary>
+    /// Gets filtered result
+    /// </summary>
+    /// <param name="query"></param>
+    /// <returns></returns>
+    Task<PagedResult<SkillResponseDTO>> GetPagedAsync(SkillQuery query);
 
     /// <summary>
     /// Retrieves a specific skill by its identifier.
