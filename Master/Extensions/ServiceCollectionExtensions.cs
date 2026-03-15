@@ -195,7 +195,8 @@ namespace Master.Extensions
 
             services.AddScoped<IJobPostService, JobPostService>();
             services.AddScoped<ISkillService, SkillService>();
-            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
             //services.AddScoped<IFileStorage, LocalDiskStorage>();
             //services.AddScoped<IAttachmentService, AttachmentService>();

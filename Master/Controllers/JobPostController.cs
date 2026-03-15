@@ -1,7 +1,12 @@
-﻿using Master.Common;
+﻿using System.Security.Claims;
+using Master.Common;
 using Master.DTOs;
+using Master.Features.JobPosts.Commands;
+using Master.Features.JobPosts.Queries;
 using Master.Models;
 using Master.Services;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -11,234 +16,103 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+//[Authorize]
 public class JobPostController : ControllerBase
 {
-    private readonly IJobPostService _jobPostService;
-    private readonly IAuthService _authService;
+    /// <summary>
+    /// Mediator instance for handling commands and queries related to job posts.
+    /// </summary>
+    private readonly IMediator _mediator;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="JobPostController"/> class.
+    /// Constructor for JobPostController, initializes the mediator instance.
     /// </summary>
-    /// <param name="jobPostService">Service responsible for job post operations.</param>
-    /// <param name="authService">Authentication service used to access current user information.</param>
-    public JobPostController(IJobPostService jobPostService, IAuthService authService)
-    {
-        _jobPostService = jobPostService;
-        _authService = authService;
-    }
+    /// <param name="mediator"></param>
+    public JobPostController(IMediator mediator) => _mediator = mediator;
 
     /// <summary>
-    /// Retrieves all job posts.
+    /// UserId property retrieves the current user's ID from the claims. This is used for operations that require user context, such as creating or updating job posts.
     /// </summary>
-    /// <returns>A list of all job posts.</returns>
-    [HttpGet("All")]
-    public async Task<ActionResult<ApiResponse<IEnumerable<JobPostResponseDTO>>>> GetAll()
-    {
-        var jobs = await _jobPostService.GetAllJobsAsync();
-
-        if (jobs is null || !jobs.Any())
-        {
-            return NotFound(
-                ApiResponse<IEnumerable<JobPostResponseDTO>>
-                .ErrorResponse("Jobs not found!")
-            );
-        }
-
-        return Ok(
-            ApiResponse<IEnumerable<JobPostResponseDTO>>
-            .SuccessResponse(jobs)
-        );
-    }
+    private Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     /// <summary>
-    /// Retrieves a specific job post by its ID.
+    /// Gets all job posts. This endpoint is accessible to anonymous users, allowing anyone to view available job posts without authentication.
     /// </summary>
-    /// <param name="id">The unique identifier of the job post.</param>
-    /// <returns>The requested job post.</returns>
-    [HttpGet("get by:{id:guid}")]
-    public async Task<ActionResult<ApiResponse<JobPostResponseDTO>>> GetById(Guid id)
-    {
-        var job = await _jobPostService.GetJobByIdAsync(id);
-
-        if (job is null)
-            return NotFound(ApiResponse<object>.ErrorResponse($"Job with ID: {id} not found!"));
-
-        return Ok(ApiResponse<JobPostResponseDTO>.SuccessResponse(job, "Job Post returned successfully!"));
-    }
+    /// <returns></returns>
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetAll()
+        => Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(await _mediator.Send(new GetAllJobsQuery())));
 
     /// <summary>
-    /// Creates a new job post.
+    /// Gets a specific job post by its ID. This endpoint is also accessible to anonymous users, allowing anyone to view the details of a specific job post without authentication.
     /// </summary>
-    /// <param name="request">Job post creation data.</param>
-    /// <returns>The created job post.</returns>
-    [HttpPost("Create")]
-    public async Task<ActionResult<ApiResponse<JobPostResponseDTO>>> Create([FromBody] CreateJobPostDTO request)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(
-                ApiResponse<Dictionary<string, string[]>>
-                .ErrorResponse("Validation Error", ToValidationErrors(ModelState))
-            );
-        }
-
-        var userId = _authService.UserId;
-
-        var result = await _jobPostService.CreateJobAsync(userId, request);
-
-        if (result == null)
-        {
-            return BadRequest(
-                ApiResponse<JobPostResponseDTO>
-                .ErrorResponse("Job could not be created")
-            );
-        }
-
-        return Ok(
-            ApiResponse<JobPostResponseDTO>
-            .SuccessResponse(result, "Job created successfully")
-        );
-    }
+    /// <param name="id"></param>
+    /// <returns></returns>
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+        => Ok(ApiResponse<JobPostResponseDTO>.SuccessResponse(await _mediator.Send(new GetJobByIdQuery(id))));
 
     /// <summary>
-    /// Updates an existing job post.
+    /// MyJobs endpoint retrieves all job posts created by the currently authenticated user. This allows users to manage their own job posts, view their status,
+    /// and make updates as needed. The endpoint requires authentication to ensure that users can only access their own job posts.
     /// </summary>
-    /// <param name="jobId">The ID of the job post to update.</param>
-    /// <param name="request">Updated job post data.</param>
-    /// <returns>The updated job post.</returns>
-    [HttpPut("update/{jobId:guid}")]
-    public async Task<ActionResult<ApiResponse<JobPostResponseDTO>>> Update(
-        Guid jobId,
-        [FromBody] UpdateJobPostDTO request)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(
-                ApiResponse<Dictionary<string, string[]>>
-                .ErrorResponse("Validation Error", ToValidationErrors(ModelState))
-            );
-        }
-
-        var userId = _authService.UserId;
-
-        var updatedJob = await _jobPostService.UpdateJobAsync(jobId, userId, request);
-
-        if (updatedJob == null)
-        {
-            return NotFound(
-                ApiResponse<object>
-                .ErrorResponse($"Job with ID: {jobId} not found")
-            );
-        }
-
-        return Ok(
-            ApiResponse<JobPostResponseDTO>
-            .SuccessResponse(updatedJob, "Job updated successfully")
-        );
-    }
+    /// <returns></returns>
+    [HttpGet("myJobs")]
+    public async Task<IActionResult> GetMyJobs()
+        => Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(await _mediator.Send(new GetMyJobsQuery(UserId))));
 
     /// <summary>
-    /// Deletes a job post.
+    /// Gets active job posts that require a specific skill. This endpoint allows users to find job posts that match their skills and interests. 
+    /// It is accessible to anonymous users, enabling anyone to search for jobs based on required skills without authentication.
     /// </summary>
-    /// <param name="jobId">The ID of the job post to delete.</param>
-    /// <returns>Success message.</returns>
-    [HttpDelete("delete/{jobId:guid}")]
-    public async Task<IActionResult> Delete(Guid jobId)
-    {
-        var userId = _authService.UserId;
-
-        await _jobPostService.DeleteJobAsync(jobId, userId);
-
-        return Ok(ApiResponse<object>.SuccessResponse("Job deleted successfully."));
-    }
+    /// <param name="skillId"></param>
+    /// <returns></returns>
+    [HttpGet("bySkill/{skillId}")]
+    public async Task<IActionResult> GetBySkill(Guid skillId)
+        => Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(await _mediator.Send(new GetActiveJobsBySkillQuery(skillId))));
 
     /// <summary>
-    /// Retrieves active job posts filtered by skill.
+    /// Creates a new job post. This endpoint requires authentication, as only authenticated users can create job posts. The request body should contain the necessary details for the job post, 
+    /// such as title, description, budget, and required skills. Upon successful creation, the endpoint returns the details of the newly created job post.
     /// </summary>
-    /// <param name="skillId">Skill identifier used for filtering jobs.</param>
-    /// <returns>A list of active jobs requiring the specified skill.</returns>
-    [HttpGet("activeJP-by-skill{skillId:guid}")]
-    public async Task<ActionResult<ApiResponse<IEnumerable<JobPostResponseDTO>>>> GetActiveJobsBySkill(Guid skillId)
-    {
-        var result = await _jobPostService.GetActiveJobsBySkillAsync(skillId);
-
-        if (result is null || !result.Any())
-        {
-            return NotFound(
-                ApiResponse<IEnumerable<JobPostResponseDTO>>
-                .ErrorResponse("Jobs not found!")
-            );
-        }
-
-        return Ok(
-            ApiResponse<IEnumerable<JobPostResponseDTO>>
-            .SuccessResponse(result)
-        );
-    }
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [HttpPost("create")]
+    public async Task<IActionResult> Create([FromBody] CreateJobPostDTO request)
+        => Ok(ApiResponse<JobPostResponseDTO>.SuccessResponse(await _mediator.Send(new CreateJobCommand(UserId, request))));
 
     /// <summary>
-    /// Changes the status of a job post.
+    /// Updates an existing job post. This endpoint requires authentication, as only the owner of the job 
+    /// post can update it. The request body should contain the updated details for the job post,
     /// </summary>
-    /// <param name="id">The job post ID.</param>
-    /// <param name="status">New job status (Active, Completed, Canceled, etc.).</param>
-    /// <returns>Status update result.</returns>
+    /// <param name="id"></param>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateJobPostDTO request)
+        => Ok(ApiResponse<JobPostResponseDTO>.SuccessResponse(await _mediator.Send(new UpdateJobCommand(id, UserId, request))));
+
+    /// <summary>
+    /// Changes the status of a job post. This endpoint allows the owner of the job post to update its status (e.g., from Active to InProgress or Completed).
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="newStatus"></param>
+    /// <returns></returns>
     [HttpPatch("{id}/status")]
-    public async Task<IActionResult> ChangeStatus(Guid id, [FromBody] string status)
-    {
-        var userId = _authService.UserId;
-
-        if (!TryParseJobStatus(status, out JobPostStatus parsedStatus))
-        {
-            return BadRequest(ApiResponse<object>.ErrorResponse("Invalid status value. Allowed: Active, Completed, Canceled, etc."));
-        }
-
-        var result = await _jobPostService.ChangeJobStatusAsync(id, userId, parsedStatus);
-
-        return Ok(ApiResponse<object>.SuccessResponse("Status changed successfully"));
-    }
+    public async Task<IActionResult> ChangeStatus(Guid id, [FromBody] JobPostStatus newStatus)
+        => Ok(ApiResponse<bool>.SuccessResponse(await _mediator.Send(new ChangeJobStatusCommand(id, UserId, newStatus))));
 
     /// <summary>
-    /// Retrieves job posts created by the currently authenticated user.
+    /// Deletes a job post. This endpoint requires authentication, as only the owner of the job post can delete it. 
+    /// Upon successful deletion, the endpoint returns a success message confirming that the job post has been deleted.
     /// </summary>
-    /// <returns>A list of the user's job posts.</returns>
-    [HttpGet("my-jobs")]
-    public async Task<ActionResult<ApiResponse<IEnumerable<JobPostResponseDTO>>>> GetMyJobs()
+    /// <param name="id"></param>
+    /// <returns></returns>
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
     {
-        var userId = _authService.UserId;
-        var result = await _jobPostService.GetMyJobsAsync(userId);
-
-        if (result is null || !result.Any())
-        {
-            return NotFound(
-                ApiResponse<IEnumerable<JobPostResponseDTO>>
-                .ErrorResponse("Jobs not found!")
-            );
-        }
-
-        return Ok(
-            ApiResponse<IEnumerable<JobPostResponseDTO>>
-            .SuccessResponse(result)
-        );
-    }
-
-    /// <summary>
-    /// Attempts to parse the provided string into a valid JobPostStatus enum value.
-    /// </summary>
-    private bool TryParseJobStatus(string status, out JobPostStatus result)
-    {
-        return Enum.TryParse<JobPostStatus>(status, true, out result) && Enum.IsDefined(typeof(JobPostStatus), result);
-    }
-
-    /// <summary>
-    /// Converts ModelState validation errors into a dictionary format.
-    /// </summary>
-    private Dictionary<string, string[]> ToValidationErrors(ModelStateDictionary modelState)
-    {
-        return modelState
-            .Where(x => x.Value.Errors.Count > 0)
-            .ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-            );
+        await _mediator.Send(new DeleteJobCommand(id, UserId));
+        return Ok(ApiResponse<string>.SuccessResponse("Job post deleted successfully."));
     }
 }
