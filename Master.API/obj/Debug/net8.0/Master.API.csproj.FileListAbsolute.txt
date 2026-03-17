@@ -1,0 +1,9 @@
+C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\Master.API.csproj.AssemblyReference.cache
+C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\Master.API.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\Master.API.AssemblyInfoInputs.cache
+C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\Master.API.AssemblyInfo.cs
+C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\Master.API.csproj.CoreCompileInputs.cache
+C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\Master.API.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\Master.API.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\Master.API.sourcelink.json

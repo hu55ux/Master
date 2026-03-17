@@ -1,0 +1,6 @@
+C:\Users\user\Desktop\C++\Master\Master.Application\obj\Debug\net8.0\Master.Application.csproj.AssemblyReference.cache
+C:\Users\user\Desktop\C++\Master\Master.Application\obj\Debug\net8.0\Master.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user\Desktop\C++\Master\Master.Application\obj\Debug\net8.0\Master.Application.AssemblyInfoInputs.cache
+C:\Users\user\Desktop\C++\Master\Master.Application\obj\Debug\net8.0\Master.Application.AssemblyInfo.cs
+C:\Users\user\Desktop\C++\Master\Master.Application\obj\Debug\net8.0\Master.Application.csproj.CoreCompileInputs.cache
+C:\Users\user\Desktop\C++\Master\Master.Application\obj\Debug\net8.0\Master.Application.sourcelink.json

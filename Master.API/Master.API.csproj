@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="MediatR" Version="12.5.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+		<PackageReference Include="Hangfire" Version="1.8.23" />
+		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
+		<PackageReference Include="Hangfire.SqlServer" Version="1.8.23" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Master.Application\Master.Application.csproj" />
+		<ProjectReference Include="..\Master.Domain\Master.Domain.csproj" />
+		<ProjectReference Include="..\Master.Infrastructure\Master.Infrastructure.csproj" />
+	</ItemGroup>
+
+</Project>

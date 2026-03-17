@@ -1,0 +1,6 @@
+C:\Users\user\Desktop\C++\Master\Master.Infrastructure\obj\Debug\net8.0\Master.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user\Desktop\C++\Master\Master.Infrastructure\obj\Debug\net8.0\Master.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\user\Desktop\C++\Master\Master.Infrastructure\obj\Debug\net8.0\Master.Infrastructure.AssemblyInfo.cs
+C:\Users\user\Desktop\C++\Master\Master.Infrastructure\obj\Debug\net8.0\Master.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\user\Desktop\C++\Master\Master.Infrastructure\obj\Debug\net8.0\Master.Infrastructure.sourcelink.json
+C:\Users\user\Desktop\C++\Master\Master.Infrastructure\obj\Debug\net8.0\Master.Infrastructure.csproj.AssemblyReference.cache
