@@ -1,140 +1,157 @@
-//using Master.Common;
-//using Master.DTOs;
-//using Master.Services;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.AspNetCore.Mvc.ModelBinding;
-//using Microsoft.Extensions.Configuration.UserSecrets;
-//namespace Master.Controllers;
+﻿using System.Security.Claims;
+using Master.Common;
+using Master.DTOs;
+using Master.Features.Skills.Commands.AssignSkills;
+using Master.Features.Skills.Commands.CreateSkill;
+using Master.Features.Skills.Commands.RemoveSkill;
+using Master.Features.Skills.Commands.UpdateSkill;
+using Master.Features.Skills.Queries.GetAllSkills;
+using Master.Features.Skills.Queries.GetById;
+using Master.Features.Skills.Queries.GetMastersBySkill;
+using Master.Features.Skills.Queries.GetMySkilss;
+using Master.Features.Skills.Queries.GetPagedResult;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-//[Route("api/[controller]")]
-//[ApiController]
-//public class SkillController : ControllerBase
-//{
+namespace Master.Controllers;
 
-//    private readonly ISkillService _skillService;
-//    //private readonly IAuthService _authService;
+/// <summary>
+/// Controller for managing skills in the Master application. This controller provides endpoints for creating, updating, retrieving, and deleting skills,
+/// as well as assigning skills to masters and retrieving masters by skill. It utilizes the MediatR library to handle commands and queries related to skills, 
+/// allowing for a clean separation of concerns and promoting a maintainable architecture. Each endpoint is designed to perform specific operations related to skills
+/// , such as creating a new skill, updating an existing skill, retrieving a paginated list of skills, and managing the association between skills and masters.
+/// </summary>
+[Route("api/[controller]")]
+[ApiController]
+public class SkillController : ControllerBase
+{
 
-//    public SkillController(ISkillService skillService, IAuthService authService)
-//    {
-//        _skillService = skillService;
-//        _authService = authService;
-//    }
+    /// <summary>
+    /// Mediator instance for handling commands and queries related to skills. This allows the controller to delegate the processing of skill
+    /// -related operations to the appropriate handlers, promoting a clean separation of concerns and enabling a more maintainable and scalable architecture.
+    /// </summary>
+    private readonly IMediator _mediator;
 
-//    [HttpGet("All")]
-//    public async Task<ActionResult<ApiResponse<IEnumerable<SkillResponseDTO>>>> GetAll()
-//    {
-//        var skills = await _skillService.GetAllSkillsAsync();
+    /// <summary>
+    /// User ID of the currently authenticated user. This property retrieves the user's unique identifier from the claims in 
+    /// the authentication token, allowing the controller to identify the user making requests and perform operations on their behalf when necessary.
+    /// </summary>
+    private Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-//        if (skills is null || !skills.Any())
-//        {
-//            return NotFound(
-//                ApiResponse<IEnumerable<JobPostResponseDTO>>
-//                .ErrorResponse("Skills not found!")
-//            );
-//        }
+    /// <summary>
+    /// Constructor for the SkillController. It initializes the controller with an instance of IMediator, 
+    /// which is used to send commands and queries to the appropriate handlers for processing skill-related operations.
+    /// </summary>
+    /// <param name="mediator"></param>
+    public SkillController(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
 
-//        return Ok(
-//            ApiResponse<IEnumerable<SkillResponseDTO>>
-//            .SuccessResponse(skills, "Skills retrieved successfully."));
-//    }
+    /// <summary>
+    /// Gets a list of all skills. This endpoint allows you to retrieve a complete list of all the skills available in the system.
+    /// The response will include details about each skill, such as its name and description,
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("all")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<SkillResponseDTO>>>> GetAll()
+    {
+        var result = await _mediator.Send(new GetAllSkillsQuery());
+        return Ok(ApiResponse<IEnumerable<SkillResponseDTO>>.SuccessResponse(result));
+    }
 
-//    [HttpGet("byID/{skillId}")]
-//    public async Task<ActionResult<ApiResponse<SkillResponseDTO>>> GetSkillById(Guid skillId)
-//    {
-//        var skill = await _skillService.GetSkillByIdAsync(skillId);
+    /// <summary>
+    /// Gets a paginated list of skills. This endpoint allows you to retrieve a list of skills with pagination support. You can specify query parameters such as page number, page size, and optional filters to customize the results. The 
+    /// response will include a paginated list of skills along with metadata about the total number of skills and pages available based on the provided pagination parameters.
+    /// </summary>
+    [HttpGet("paged")]
+    public async Task<ActionResult<ApiResponse<PagedResult<SkillResponseDTO>>>> GetPaged([FromQuery] SkillQuery queryParams)
+    {
+        var result = await _mediator.Send(new GetPagedSkillsQuery(queryParams));
+        return Ok(ApiResponse<PagedResult<SkillResponseDTO>>.SuccessResponse(result));
+    }
 
-//        if (skill is null)
-//        {
-//            return NotFound(
-//                ApiResponse<object>
-//                .ErrorResponse("Skill not found by your Id"));
-//        }
+    /// <summary>
+    /// Gets a specific skill by its ID. This endpoint allows you to retrieve detailed information about a particular skill by providing its unique identifier in the URL. The response will include the skill's name, 
+    /// description, and any other relevant details associated with that skill. If the skill with the specified ID does not exist, an appropriate error response will be returned.
+    /// </summary>
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ApiResponse<SkillResponseDTO>>> GetById(Guid id)
+    {
+        var result = await _mediator.Send(new GetByIdQuery(id));
+        return Ok(ApiResponse<SkillResponseDTO>.SuccessResponse(result));
+    }
 
-//        return Ok(
-//            ApiResponse<SkillResponseDTO>
-//            .SuccessResponse(skill, "Skill returned successfully."));
-//    }
+    /// <summary>
+    /// Gets a list of masters who possess a specific skill. This endpoint allows you to retrieve all the masters that have been assigned a particular skill by providing the skill ID in the URL. The response will include 
+    /// details about each master, such as their name, contact information, and other relevant data, allowing you to easily identify which masters have the specified skill.
+    /// </summary>
+    [HttpGet("masters-by-skill/{skillId}")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<AuthResponseDTO>>>> GetMastersBySkill(Guid skillId)
+    {
+        var result = await _mediator.Send(new GetMastersBySkillQuery(skillId));
+        return Ok(ApiResponse<IEnumerable<AuthResponseDTO>>.SuccessResponse(result));
+    }
 
-//    [HttpPost("create")]
-//    public async Task<ActionResult<ApiResponse<SkillResponseDTO>>> CreateSkill([FromBody] CreateSkillDTO request)
-//    {
-//        if (!ModelState.IsValid)
-//        {
-//            return BadRequest(
-//                ApiResponse<Dictionary<string, string[]>>
-//                .ErrorResponse("Validation Error", ToValidationErrors(ModelState))
-//            );
-//        }
+    /// <summary>
+    /// Create a new skill. This endpoint allows you to add a new skill to the system by providing 
+    /// the necessary information such as the skill name and description in the request body.
+    /// </summary>
+    [HttpPost]
+    public async Task<ActionResult<ApiResponse<SkillResponseDTO>>> Create([FromBody] CreateSkillDTO request)
+    {
+        var result = await _mediator.Send(new CreateSkillCommand(request));
+        return Ok(ApiResponse<SkillResponseDTO>.SuccessResponse(result, "Skill created successfully."));
+    }
 
-//        var result = await _skillService.CreateSkillAsync(request);
+    /// <summary>
+    /// Updates an existing skill by its ID. This endpoint allows you to modify the details of a skill, such as its name and description.
+    /// You need to provide the skill ID in the URL and the updated information in the request body.
+    /// If the skill with the specified ID exists, it will be updated with the new information; otherwise, an appropriate error response will be returned.
+    /// </summary>
+    [HttpPut("{id}")]
+    public async Task<ActionResult<ApiResponse<SkillResponseDTO>>> Update(Guid id, [FromBody] UpdateSkillDTO request)
+    {
+        var result = await _mediator.Send(new UpdateSkillCommand(id, request));
+        return Ok(ApiResponse<SkillResponseDTO>.SuccessResponse(result, "Skill updated successfully."));
+    }
 
-//        if (result == null)
-//        {
-//            return BadRequest(
-//                ApiResponse<SkillResponseDTO>
-//                .ErrorResponse("Skill could not be created")
-//            );
-//        }
+    /// <summary>
+    /// Assigns a list of skills to a master. This will add the specified skills to the master's existing skill 
+    /// set without removing any previously assigned skills. If you want to replace the master's skills entirely, use the UpdateMasterSkills endpoint instead.
+    /// </summary>
+    /// <param name="command"></param>
+    /// <returns></returns>
+    [HttpPost("assignMe")]
+    public async Task<ActionResult<ApiResponse<bool>>> AssignToMe([FromBody] List<Guid> skillIds)
+    {
+        var result = await _mediator.Send(new AssignSkillsToMasterCommand(UserId, skillIds));
+        return Ok(ApiResponse<bool>.SuccessResponse(result, "Skills added to your profile."));
+    }
 
-//        return Ok(
-//            ApiResponse<SkillResponseDTO>
-//            .SuccessResponse(result, "skill created successfully")
-//        );
-//    }
+    /// <summary>
+    /// Removes a specific skill from a master. This will unassign the specified skill from the master without affecting 
+    /// any other skills that the master may have. Use this endpoint when you want to remove a single skill from a master while keeping their other skills intact.
+    /// </summary>
+    [HttpDelete("removeSkill/{skillId}")]
+    public async Task<ActionResult<ApiResponse<bool>>> RemoveFromMe(Guid skillId)
+    {
+        var result = await _mediator.Send(new RemoveSkillCommand(UserId, skillId));
+        return Ok(ApiResponse<bool>.SuccessResponse(result, "Skill removed from your profile."));
+    }
 
-//    [HttpDelete("remove/{skillId}")]
-//    public async Task<ActionResult<ApiResponse<SkillResponseDTO>>> DeleteSkill(Guid skillId)
-//    {
-//        var userId = _authService.UserId;
+    /// <summary>
+    /// Gets a list of skills assigned to the currently authenticated master. This endpoint allows the master to retrieve all the skills that have been assigned to 
+    /// their profile. The response will include details about each skill, such as its name and description, enabling the master to easily view and manage their skill set.
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("my-skills")]
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<IEnumerable<SkillResponseDTO>>>> GetMySkills()
+    {
+        var result = await _mediator.Send(new GetMySkillsQuery(UserId));
+        return Ok(ApiResponse<IEnumerable<SkillResponseDTO>>.SuccessResponse(result));
+    }
+}
 
-//        var skill = await _skillService.RemoveSkillFromMasterAsync(userId, skillId);
-
-//        if (skill is false)
-//        {
-//            return NotFound(
-//                ApiResponse<object>
-//                .ErrorResponse("Skill not found by your Id"));
-//        }
-//        return Ok(
-//            ApiResponse<object>
-//            .SuccessResponse("Skill removed successfully."));
-
-//    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//    /// <summary>
-//    /// Converts ModelState validation errors into a dictionary format.
-//    /// </summary>
-//    private Dictionary<string, string[]> ToValidationErrors(ModelStateDictionary modelState)
-//    {
-//        return modelState
-//            .Where(x => x.Value.Errors.Count > 0)
-//            .ToDictionary(
-//                kvp => kvp.Key,
-//                kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-//            );
-//    }
-
-
-//}

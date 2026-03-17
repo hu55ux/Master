@@ -1,14 +1,18 @@
 ﻿using System.Security.Claims;
 using Master.Common;
 using Master.DTOs;
-using Master.Features.JobPosts.Commands;
-using Master.Features.JobPosts.Queries;
+using Master.Features.JobPosts.Commands.ChangejobStatus;
+using Master.Features.JobPosts.Commands.CreateJob;
+using Master.Features.JobPosts.Commands.DeleteJob;
+using Master.Features.JobPosts.Commands.UpdateJob;
+using Master.Features.JobPosts.Queries.GetActiveJobs;
+using Master.Features.JobPosts.Queries.GetAllJobs;
+using Master.Features.JobPosts.Queries.GetJobById;
+using Master.Features.JobPosts.Queries.GetMyJobs;
 using Master.Models;
-using Master.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 /// <summary>
 /// Controller responsible for managing Job Posts.

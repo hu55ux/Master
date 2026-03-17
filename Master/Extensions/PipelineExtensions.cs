@@ -1,4 +1,5 @@
-﻿using Master.Data;
+﻿using Hangfire;
+using Master.Data;
 using Master.Middleware;
 
 namespace Master.Extensions
@@ -40,6 +41,14 @@ namespace Master.Extensions
             // Enable authentication and authorization
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                Authorization = new[] { new HangfireAdminAuthorizationFilter() },
+                DashboardTitle = "Master API - Job Manager",
+                AppPath = "/" // "Back to site" linki üçün
+            });
+            app.UseHangfireJobs();
 
             // Map controller endpoints
             app.MapControllers();
