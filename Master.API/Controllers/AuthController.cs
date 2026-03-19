@@ -73,6 +73,7 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
+    [Authorize]
     [HttpPost("refresh")]
     public async Task<ActionResult<ApiResponse<AuthResponseDTO>>> Refresh([FromBody] RefreshTokenRequest request)
     {
@@ -86,6 +87,7 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
+    [Authorize]
     [HttpPost("revoke")]
     public async Task<ActionResult> Revoke([FromBody] RefreshTokenRequest request)
     {
