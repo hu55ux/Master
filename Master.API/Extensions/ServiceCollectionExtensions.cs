@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 using FluentValidation;
@@ -8,9 +8,11 @@ using Master.Application.Mapping;
 using Master.Application.Models;
 using Master.Application.Services;
 using Master.Application.Validators;
+using Master.Application.Interfaces;
 using Master.Infrastructure.BackgroundJobs;
 using Master.Infrastructure.Config;
 using Master.Infrastructure.Data;
+using Master.Infrastructure.Repositories;
 using Master.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -216,7 +218,11 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<TokenCleanupJob>();
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Master.Application.Features.Authorization.Commands.RegisterUser.RegisterUserCommand).Assembly));
+
+        services.AddScoped<IAuthRepository, AuthRepository>();
+        services.AddScoped<ISkillRepository, SkillRepository>();
+        services.AddScoped<IJobPostRepository, JobPostRepository>();
 
         return services;
     }

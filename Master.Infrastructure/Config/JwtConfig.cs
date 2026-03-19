@@ -1,4 +1,4 @@
-﻿namespace Master.Infrastructure.Config
+namespace Master.Infrastructure.Config
 {
     /// <summary>
     /// Represents JWT configuration settings.
@@ -9,7 +9,7 @@
         /// <summary>
         /// The configuration section name in appsettings.json.
         /// </summary>
-        public const string SectionName = "JwtSettings";
+        public const string SectionName = "JWTSettings";
 
         /// <summary>
         /// Secret key used to sign JWT tokens.

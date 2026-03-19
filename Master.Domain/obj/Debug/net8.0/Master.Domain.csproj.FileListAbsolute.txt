@@ -11,3 +11,16 @@ C:\Users\user\Desktop\C++\Master\Master.Domain\obj\Debug\net8.0\Master.Domain.dl
 C:\Users\user\Desktop\C++\Master\Master.Domain\obj\Debug\net8.0\refint\Master.Domain.dll
 C:\Users\user\Desktop\C++\Master\Master.Domain\obj\Debug\net8.0\Master.Domain.pdb
 C:\Users\user\Desktop\C++\Master\Master.Domain\obj\Debug\net8.0\ref\Master.Domain.dll
+C:\Users\mr13\Documents\huseyn\Master\Master.Domain\bin\Debug\net8.0\Master.Domain.deps.json
+C:\Users\mr13\Documents\huseyn\Master\Master.Domain\bin\Debug\net8.0\Master.Domain.dll
+C:\Users\mr13\Documents\huseyn\Master\Master.Domain\bin\Debug\net8.0\Master.Domain.pdb
+C:\Users\mr13\Documents\huseyn\Master\Master.Domain\obj\Debug\net8.0\Master.Domain.csproj.AssemblyReference.cache
+C:\Users\mr13\Documents\huseyn\Master\Master.Domain\obj\Debug\net8.0\Master.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\mr13\Documents\huseyn\Master\Master.Domain\obj\Debug\net8.0\Master.Domain.AssemblyInfoInputs.cache
+C:\Users\mr13\Documents\huseyn\Master\Master.Domain\obj\Debug\net8.0\Master.Domain.AssemblyInfo.cs
+C:\Users\mr13\Documents\huseyn\Master\Master.Domain\obj\Debug\net8.0\Master.Domain.csproj.CoreCompileInputs.cache
+C:\Users\mr13\Documents\huseyn\Master\Master.Domain\obj\Debug\net8.0\Master.Domain.sourcelink.json
+C:\Users\mr13\Documents\huseyn\Master\Master.Domain\obj\Debug\net8.0\Master.Domain.dll
+C:\Users\mr13\Documents\huseyn\Master\Master.Domain\obj\Debug\net8.0\refint\Master.Domain.dll
+C:\Users\mr13\Documents\huseyn\Master\Master.Domain\obj\Debug\net8.0\Master.Domain.pdb
+C:\Users\mr13\Documents\huseyn\Master\Master.Domain\obj\Debug\net8.0\ref\Master.Domain.dll
