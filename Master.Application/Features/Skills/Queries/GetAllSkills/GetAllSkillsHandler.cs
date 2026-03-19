@@ -1,26 +1,24 @@
 ﻿using AutoMapper;
 using Master.Application.DTOs;
+using Master.Application.Interfaces;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Master.Application.Features.Skills.Queries.GetAllSkills;
 
 public class GetAllSkillsHandler : IRequestHandler<GetAllSkillsQuery, IEnumerable<SkillResponseDTO>>
 {
-    private readonly MasterDbContext _context;
+    private readonly ISkillRepository _skillRepository;
     private readonly IMapper _mapper;
 
-    public GetAllSkillsHandler(MasterDbContext context, IMapper mapper)
+    public GetAllSkillsHandler(ISkillRepository skillRepository, IMapper mapper)
     {
-        _context = context;
+        _skillRepository = skillRepository;
         _mapper = mapper;
     }
 
     public async Task<IEnumerable<SkillResponseDTO>> Handle(GetAllSkillsQuery request, CancellationToken ct)
     {
-        var skills = await _context.Skills
-            .AsNoTracking()
-            .ToListAsync(ct);
+        var skills = await _skillRepository.GetAllAsync(ct);
 
         return _mapper.Map<IEnumerable<SkillResponseDTO>>(skills);
     }

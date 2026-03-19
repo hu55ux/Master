@@ -10,6 +10,7 @@ using Master.Data;
 using Master.Mapping;
 using Master.Models;
 using Master.Services;
+using Master.Storage;
 using Master.Validators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -215,10 +216,9 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<TokenCleanupJob>();
+        services.AddScoped<IFileStorage, LocalDiskStorage>();
+        services.AddScoped<IUserAttachmentService, UserAttachmentService>();
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-
-        //services.AddScoped<IFileStorage, LocalDiskStorage>();
-        //services.AddScoped<IAttachmentService, AttachmentService>();
 
         return services;
     }

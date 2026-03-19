@@ -1,26 +1,27 @@
-﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
+﻿using Master.Application.Interfaces;
+using MediatR;
 
 namespace Master.Application.Features.Skills.Commands.RemoveSkill;
 
 public class RemoveSkillHandler : IRequestHandler<RemoveSkillCommand, bool>
 {
-    private readonly MasterDbContext _context;
+    private readonly ISkillRepository _skillRepository;
 
-    public RemoveSkillHandler(MasterDbContext context) => _context = context;
+    public RemoveSkillHandler(ISkillRepository skillRepository)
+    {
+        _skillRepository = skillRepository;
+    }
 
     public async Task<bool> Handle(RemoveSkillCommand command, CancellationToken ct)
     {
-        var userSkill = await _context.UserSkills
-            .FirstOrDefaultAsync(x => x.UserId == command.MasterId && x.SkillId == command.SkillId, ct);
+        var userSkill = await _skillRepository.GetUserSkillAsync(command.MasterId, command.SkillId, ct);
 
         if (userSkill == null) return false;
 
-        _context.UserSkills.Remove(userSkill);
-        var master = await _context.Users.FindAsync(new object[] { command.MasterId }, ct);
-        if (master != null) master.UpdatedAt = DateTimeOffset.UtcNow;
+        _skillRepository.RemoveUserSkill(userSkill);
 
-        await _context.SaveChangesAsync(ct);
-        return true;
+        await _skillRepository.UpdateUserTimestampAsync(command.MasterId, ct);
+
+        return await _skillRepository.SaveChangesAsync(ct);
     }
 }

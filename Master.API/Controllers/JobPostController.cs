@@ -8,111 +8,121 @@ using Master.Application.Features.JobPosts.Queries.GetActiveJobs;
 using Master.Application.Features.JobPosts.Queries.GetAllJobs;
 using Master.Application.Features.JobPosts.Queries.GetJobById;
 using Master.Application.Features.JobPosts.Queries.GetMyJobs;
+using Master.Application.Features.JobPosts.Queries.GetPagedJobs;
 using Master.Application.Models;
 using Master.Features.JobPosts.Commands.DeleteJob;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+namespace Master.Api.Controllers;
+
 /// <summary>
-/// Controller responsible for managing Job Posts.
-/// Provides endpoints for creating, updating, deleting and retrieving job posts.
+/// Controller responsible for managing job posts.
+/// Provides endpoints for creating, updating, deleting, and retrieving job posts with filtering and pagination.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-//[Authorize]
+[Authorize]
 public class JobPostController : ControllerBase
 {
-    /// <summary>
-    /// Mediator instance for handling commands and queries related to job posts.
-    /// </summary>
     private readonly IMediator _mediator;
 
     /// <summary>
-    /// Constructor for JobPostController, initializes the mediator instance.
+    /// Initializes a new instance of the <see cref="JobPostController"/> class.
     /// </summary>
-    /// <param name="mediator"></param>
+    /// <param name="mediator">The mediator instance for CQRS pattern implementation.</param>
     public JobPostController(IMediator mediator) => _mediator = mediator;
 
     /// <summary>
-    /// UserId property retrieves the current user's ID from the claims. This is used for operations that require user context, such as creating or updating job posts.
+    /// Gets the unique identifier of the currently authenticated user.
     /// </summary>
     private Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     /// <summary>
-    /// Gets all job posts. This endpoint is accessible to anonymous users, allowing anyone to view available job posts without authentication.
+    /// Retrieves a paged list of job posts based on the provided query parameters (Search, Sort, Pagination).
     /// </summary>
-    /// <returns></returns>
+    /// <param name="query">The pagination and filter criteria.</param>
+    /// <returns>A paged result containing job post data transfer objects.</returns>
+    [HttpGet("paged")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetPaged([FromQuery] JobPostQuery query)
+    {
+        var result = await _mediator.Send(new GetPagedJobPostsQuery(query));
+        return Ok(ApiResponse<PagedResult<JobPostResponseDTO>>.SuccessResponse(result));
+    }
+
+    /// <summary>
+    /// Retrieves all available job posts without pagination.
+    /// </summary>
+    /// <returns>A collection of all job posts.</returns>
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> GetAll()
         => Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(await _mediator.Send(new GetAllJobsQuery())));
 
     /// <summary>
-    /// Gets a specific job post by its ID. This endpoint is also accessible to anonymous users, allowing anyone to view the details of a specific job post without authentication.
+    /// Retrieves the details of a specific job post by its unique identifier.
     /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
+    /// <param name="id">The unique identifier of the job post.</param>
+    /// <returns>The requested job post details.</returns>
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetById(Guid id)
         => Ok(ApiResponse<JobPostResponseDTO>.SuccessResponse(await _mediator.Send(new GetJobByIdQuery(id))));
 
     /// <summary>
-    /// MyJobs endpoint retrieves all job posts created by the currently authenticated user. This allows users to manage their own job posts, view their status,
-    /// and make updates as needed. The endpoint requires authentication to ensure that users can only access their own job posts.
+    /// Retrieves all job posts created by the currently authenticated customer.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>A collection of job posts belonging to the current user.</returns>
     [HttpGet("myJobs")]
     public async Task<IActionResult> GetMyJobs()
         => Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(await _mediator.Send(new GetMyJobsQuery(UserId))));
 
     /// <summary>
-    /// Gets active job posts that require a specific skill. This endpoint allows users to find job posts that match their skills and interests. 
-    /// It is accessible to anonymous users, enabling anyone to search for jobs based on required skills without authentication.
+    /// Retrieves active job posts filtered by a specific required skill.
     /// </summary>
-    /// <param name="skillId"></param>
-    /// <returns></returns>
+    /// <param name="skillId">The unique identifier of the required skill.</param>
+    /// <returns>A collection of active job posts matching the skill.</returns>
     [HttpGet("bySkill/{skillId}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetBySkill(Guid skillId)
         => Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(await _mediator.Send(new GetActiveJobsBySkillQuery(skillId))));
 
     /// <summary>
-    /// Creates a new job post. This endpoint requires authentication, as only authenticated users can create job posts. The request body should contain the necessary details for the job post, 
-    /// such as title, description, budget, and required skills. Upon successful creation, the endpoint returns the details of the newly created job post.
+    /// Creates a new job post for the currently authenticated user.
     /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
+    /// <param name="request">The data required to create a job post.</param>
+    /// <returns>The details of the newly created job post.</returns>
     [HttpPost("create")]
     public async Task<IActionResult> Create([FromBody] CreateJobPostDTO request)
         => Ok(ApiResponse<JobPostResponseDTO>.SuccessResponse(await _mediator.Send(new CreateJobCommand(UserId, request))));
 
     /// <summary>
-    /// Updates an existing job post. This endpoint requires authentication, as only the owner of the job 
-    /// post can update it. The request body should contain the updated details for the job post,
+    /// Updates an existing job post's details. Only the owner can perform this action.
     /// </summary>
-    /// <param name="id"></param>
-    /// <param name="request"></param>
-    /// <returns></returns>
+    /// <param name="id">The unique identifier of the job post to update.</param>
+    /// <param name="request">The updated job post information.</param>
+    /// <returns>The updated job post details.</returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateJobPostDTO request)
         => Ok(ApiResponse<JobPostResponseDTO>.SuccessResponse(await _mediator.Send(new UpdateJobCommand(id, UserId, request))));
 
     /// <summary>
-    /// Changes the status of a job post. This endpoint allows the owner of the job post to update its status (e.g., from Active to InProgress or Completed).
+    /// Partially updates the status of a specific job post.
     /// </summary>
-    /// <param name="id"></param>
-    /// <param name="newStatus"></param>
-    /// <returns></returns>
+    /// <param name="id">The unique identifier of the job post.</param>
+    /// <param name="newStatus">The new status to be assigned (e.g., Active, Completed, Canceled).</param>
+    /// <returns>A boolean value indicating whether the update was successful.</returns>
     [HttpPatch("{id}/status")]
     public async Task<IActionResult> ChangeStatus(Guid id, [FromBody] JobPostStatus newStatus)
         => Ok(ApiResponse<bool>.SuccessResponse(await _mediator.Send(new ChangeJobStatusCommand(id, UserId, newStatus))));
 
     /// <summary>
-    /// Deletes a job post. This endpoint requires authentication, as only the owner of the job post can delete it. 
-    /// Upon successful deletion, the endpoint returns a success message confirming that the job post has been deleted.
+    /// Deletes a specific job post. Only the owner of the job post is authorized to delete it.
     /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
+    /// <param name="id">The unique identifier of the job post to delete.</param>
+    /// <returns>A success message confirming deletion.</returns>
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {

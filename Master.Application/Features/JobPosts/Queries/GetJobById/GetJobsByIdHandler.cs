@@ -1,28 +1,24 @@
 ﻿using AutoMapper;
 using Master.Application.DTOs;
+using Master.Application.Interfaces;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Master.Application.Features.JobPosts.Queries.GetJobById;
 
 public class GetJobByIdHandler : IRequestHandler<GetJobByIdQuery, JobPostResponseDTO>
 {
-    private readonly MasterDbContext _context;
+    private readonly IJobPostRepository _jobRepository;
     private readonly IMapper _mapper;
 
-    public GetJobByIdHandler(MasterDbContext context, IMapper mapper)
+    public GetJobByIdHandler(IJobPostRepository jobRepository, IMapper mapper)
     {
-        _context = context;
+        _jobRepository = jobRepository;
         _mapper = mapper;
     }
 
     public async Task<JobPostResponseDTO> Handle(GetJobByIdQuery request, CancellationToken ct)
     {
-        var job = await _context.JobPosts
-            .Include(j => j.Customer)
-            .Include(j => j.RequiredSkill)
-            .AsNoTracking()
-            .FirstOrDefaultAsync(j => j.Id == request.Id, ct);
+        var job = await _jobRepository.GetByIdWithDetailsAsync(request.Id, ct);
 
         if (job == null)
             throw new KeyNotFoundException($"Job with ID '{request.Id}' was not found.");

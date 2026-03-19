@@ -1,26 +1,31 @@
-﻿using Master.Application.Models;
+﻿using Master.Application.Interfaces;
+using Master.Application.Models;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Master.Application.Features.JobPosts.Commands.ChangejobStatus;
 
 public class ChangeJobStatusHandler : IRequestHandler<ChangeJobStatusCommand, bool>
 {
-    private readonly MasterDbContext _context;
+    private readonly IJobPostRepository _jobRepository;
 
-    public ChangeJobStatusHandler(MasterDbContext context) => _context = context;
+    public ChangeJobStatusHandler(IJobPostRepository jobRepository)
+    {
+        _jobRepository = jobRepository;
+    }
 
     public async Task<bool> Handle(ChangeJobStatusCommand command, CancellationToken ct)
     {
-        var job = await _context.JobPosts
-            .FirstOrDefaultAsync(j => j.Id == command.JobId && j.CustomerId == command.ClientId, ct);
+        var job = await _jobRepository.GetByIdAndCustomerIdAsync(command.JobId, command.ClientId, ct);
 
-        if (job == null) throw new KeyNotFoundException($"Job not found or unauthorized: {command.JobId}");
+        if (job == null)
+            throw new KeyNotFoundException($"Job not found or unauthorized: {command.JobId}");
 
         if (job.JPStatus == JobPostStatus.Completed || job.JPStatus == JobPostStatus.Canceled)
             throw new InvalidOperationException("Cannot change status of a completed or canceled job.");
 
         job.JPStatus = command.NewStatus;
-        return await _context.SaveChangesAsync(ct) > 0;
+
+        _jobRepository.Update(job);
+        return await _jobRepository.SaveChangesAsync(ct);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Master.Application.Models;
+﻿using Master.Application.Interfaces;
+using Master.Application.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -7,41 +8,35 @@ namespace Master.Application.Features.Skills.Commands.AssignSkills;
 
 public class AssignSkillsToMasterHandler : IRequestHandler<AssignSkillsToMasterCommand, bool>
 {
-    private readonly MasterDbContext _context;
-    private readonly UserManager<AppUser> _userManager;
+    private readonly ISkillRepository _skillRepository;
 
-    public AssignSkillsToMasterHandler(MasterDbContext context, UserManager<AppUser> userManager)
+    public AssignSkillsToMasterHandler(ISkillRepository skillRepository)
     {
-        _context = context;
-        _userManager = userManager;
+        _skillRepository = skillRepository;
     }
 
     public async Task<bool> Handle(AssignSkillsToMasterCommand command, CancellationToken ct)
     {
-        var masterExists = await _context.Users.AnyAsync(u => u.Id == command.MasterId, ct);
-        if (!masterExists) throw new KeyNotFoundException("Master profile not found.");
+        if (!await _skillRepository.MasterExistsAsync(command.MasterId, ct))
+            throw new KeyNotFoundException("Master profile not found.");
 
-        var validSkillIds = await _context.Skills
-            .Where(s => command.SkillIds.Contains(s.Id))
-            .Select(s => s.Id).ToListAsync(ct);
+        var validSkillIds = await _skillRepository.GetValidSkillIdsAsync(command.SkillIds, ct);
 
-        var existingSkillIds = await _context.UserSkills
-            .Where(us => us.UserId == command.MasterId)
-            .Select(us => us.SkillId).ToListAsync(ct);
+        var existingSkillIds = await _skillRepository.GetExistingUserSkillIdsAsync(command.MasterId, ct);
 
         var newSkills = validSkillIds
             .Where(id => !existingSkillIds.Contains(id))
-            .Select(id => new UserSkill { UserId = command.MasterId, SkillId = id }).ToList();
+            .Select(id => new UserSkill { UserId = command.MasterId, SkillId = id })
+            .ToList();
 
         if (newSkills.Any())
         {
-            await _context.UserSkills.AddRangeAsync(newSkills, ct);
+            await _skillRepository.AddUserSkillsRangeAsync(newSkills, ct);
+            await _skillRepository.UpdateUserTimestampAsync(command.MasterId, ct);
 
-            var master = await _context.Users.FindAsync(command.MasterId, ct);
-            if (master != null) master.UpdatedAt = DateTimeOffset.UtcNow;
-
-            await _context.SaveChangesAsync(ct);
+            await _skillRepository.SaveChangesAsync(ct);
         }
+
         return true;
     }
 }

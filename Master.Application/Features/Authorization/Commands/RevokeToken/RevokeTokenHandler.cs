@@ -1,17 +1,17 @@
-﻿using Master.Application.Services;
+﻿using Master.Application.Interfaces;
+using Master.Application.Services;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Master.Application.Features.Authorization.Commands.RevokeToken;
 
 public class RevokeTokenHandler : IRequestHandler<RevokeTokenCommand, Unit>
 {
-    private readonly MasterDbContext _context;
+    private readonly IAuthRepository _authRepository;
     private readonly ITokenService _tokenService;
 
-    public RevokeTokenHandler(MasterDbContext context, ITokenService tokenService)
+    public RevokeTokenHandler(IAuthRepository authRepository, ITokenService tokenService)
     {
-        _context = context;
+        _authRepository = authRepository;
         _tokenService = tokenService;
     }
 
@@ -22,13 +22,19 @@ public class RevokeTokenHandler : IRequestHandler<RevokeTokenCommand, Unit>
         {
             (_, jti) = _tokenService.ValidateRefreshJwtAndGetJti(command.RefreshToken, validateLifetime: false);
         }
-        catch { return Unit.Value; }
+        catch
+        {
+            return Unit.Value;
+        }
 
-        var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.JwtId == jti, ct);
+        var storedToken = await _authRepository.GetRefreshTokenByJtiAsync(jti!);
+
         if (storedToken != null && storedToken.IsActive)
         {
             storedToken.RevokedAt = DateTimeOffset.UtcNow;
-            await _context.SaveChangesAsync(ct);
+
+            _authRepository.UpdateRefreshToken(storedToken);
+            await _authRepository.SaveChangesAsync(ct);
         }
 
         return Unit.Value;

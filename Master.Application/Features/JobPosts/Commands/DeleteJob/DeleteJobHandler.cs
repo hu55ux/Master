@@ -1,32 +1,29 @@
-﻿using Master.Features.JobPosts.Commands.DeleteJob;
+﻿using Master.Application.Interfaces;
+using Master.Features.JobPosts.Commands.DeleteJob;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Master.Application.Features.JobPosts.Commands.DeleteJob;
 
 public class DeleteJobHandler : IRequestHandler<DeleteJobCommand, bool>
 {
-    private readonly MasterDbContext _context;
+    private readonly IJobPostRepository _jobRepository;
 
-    public DeleteJobHandler(MasterDbContext context)
+    public DeleteJobHandler(IJobPostRepository jobRepository)
     {
-        _context = context;
+        _jobRepository = jobRepository;
     }
 
     public async Task<bool> Handle(DeleteJobCommand command, CancellationToken ct)
     {
-        var job = await _context.JobPosts
-            .FirstOrDefaultAsync(j => j.Id == command.JobId && j.CustomerId == command.ClientId, ct);
+        var job = await _jobRepository.GetByIdAndCustomerIdAsync(command.JobId, command.ClientId, ct);
 
         if (job == null)
         {
             throw new KeyNotFoundException($"Job not found or unauthorized: {command.JobId}");
         }
 
-        _context.JobPosts.Remove(job);
+        _jobRepository.Remove(job);
 
-        var result = await _context.SaveChangesAsync(ct);
-
-        return result > 0;
+        return await _jobRepository.SaveChangesAsync(ct);
     }
 }

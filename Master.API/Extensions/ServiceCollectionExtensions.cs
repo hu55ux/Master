@@ -1,6 +1,18 @@
 ﻿using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Hangfire;
+using Master.Application.Mapping;
+using Master.Application.Models;
+using Master.Application.Services;
+using Master.Application.Validators;
+using Master.Infrastructure.BackgroundJobs;
+using Master.Infrastructure.Config;
+using Master.Infrastructure.Data;
+using Master.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -205,9 +217,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<TokenCleanupJob>();
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-
-        //services.AddScoped<IFileStorage, LocalDiskStorage>();
-        //services.AddScoped<IAttachmentService, AttachmentService>();
 
         return services;
     }

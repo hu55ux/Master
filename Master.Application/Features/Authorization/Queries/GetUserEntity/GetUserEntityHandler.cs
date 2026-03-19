@@ -1,22 +1,21 @@
-﻿using Master.Application.Models;
+﻿using Master.Application.Interfaces;
+using Master.Application.Models;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Master.Application.Features.Authorization.Queries.GetUserEntity;
 
 public class GetUserEntityHandler : IRequestHandler<GetUserEntityQuery, AppUser>
 {
-    private readonly MasterDbContext _context;
+    private readonly IAuthRepository _authRepository;
 
-    public GetUserEntityHandler(MasterDbContext context) => _context = context;
+    public GetUserEntityHandler(IAuthRepository authRepository)
+    {
+        _authRepository = authRepository;
+    }
 
     public async Task<AppUser> Handle(GetUserEntityQuery query, CancellationToken ct)
     {
-        var user = await _context.Users
-            .Include(u => u.UserSkills).ThenInclude(us => us.Skill)
-            .Include(u => u.JobPosts)
-            .FirstOrDefaultAsync(u => u.Id == query.UserId);
-
+        var user = await _authRepository.GetUserWithDetailsAsync(query.UserId, ct);
         return user ?? throw new KeyNotFoundException("User not found.");
     }
 }

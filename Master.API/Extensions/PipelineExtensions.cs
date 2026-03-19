@@ -1,5 +1,6 @@
 ﻿using Hangfire;
 using Master.API.Middleware;
+using Master.Infrastructure.Data;
 
 namespace Master.API.Extensions
 {

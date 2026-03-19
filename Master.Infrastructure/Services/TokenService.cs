@@ -4,7 +4,7 @@ using System.Text;
 using AutoMapper;
 using Master.Application.DTOs;
 using Master.Application.Models;
-using Master.ApplicationServices;
+using Master.Application.Services;
 using Master.Infrastructure.Config;
 using Master.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;

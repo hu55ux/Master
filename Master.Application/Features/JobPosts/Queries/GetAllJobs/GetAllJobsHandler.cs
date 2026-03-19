@@ -1,28 +1,24 @@
 ﻿using AutoMapper;
 using Master.Application.DTOs;
+using Master.Application.Interfaces;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Master.Application.Features.JobPosts.Queries.GetAllJobs;
 
 public class GetAllJobsHandler : IRequestHandler<GetAllJobsQuery, IEnumerable<JobPostResponseDTO>>
 {
-    private readonly MasterDbContext _context;
+    private readonly IJobPostRepository _jobRepository;
     private readonly IMapper _mapper;
 
-    public GetAllJobsHandler(MasterDbContext context, IMapper mapper)
+    public GetAllJobsHandler(IJobPostRepository jobRepository, IMapper mapper)
     {
-        _context = context;
+        _jobRepository = jobRepository;
         _mapper = mapper;
     }
 
     public async Task<IEnumerable<JobPostResponseDTO>> Handle(GetAllJobsQuery request, CancellationToken ct)
     {
-        var jobs = await _context.JobPosts
-            .Include(j => j.Customer)
-            .Include(j => j.RequiredSkill)
-            .AsNoTracking()
-            .ToListAsync(ct);
+        var jobs = await _jobRepository.GetAllWithDetailsAsync(ct);
 
         return _mapper.Map<IEnumerable<JobPostResponseDTO>>(jobs);
     }
