@@ -8,7 +8,11 @@ COPY ["Master.Domain/Master.Domain.csproj", "Master.Domain/"]
 COPY ["Master.Infrastructure/Master.Infrastructure.csproj", "Master.Infrastructure/"]
 
 # Restore prosesi
-RUN dotnet restore "Master.API/Master.API.csproj"
+RUN dotnet publish "Master.API.csproj" -c Release -o /app/publish \
+    --no-restore \
+    -r linux-x64 \
+    --self-contained false \
+    /p:UseAppHost=false
 
 # Qalan bütün kodları kopyalayırıq
 COPY . .
