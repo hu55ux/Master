@@ -48,8 +48,8 @@ namespace Master.Application.Mapping
                 .ForMember(dest => dest.RequiredSkillId, opt => opt.MapFrom(src => src.RequiredSkillId))
                 .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.CreatedDate))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.JPStatus.ToString()))
-                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Customer!.UserName))
-                .ForMember(dest => dest.RequiredSkillName, opt => opt.MapFrom(src => src.RequiredSkill!.Name));
+                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.UserName : null))
+                .ForMember(dest => dest.RequiredSkillName, opt => opt.MapFrom(src => src.RequiredSkill != null ? src.RequiredSkill.Name : null));
 
             // Skill -> SkillResponseDTO mapping
             CreateMap<Skill, SkillResponseDTO>();
