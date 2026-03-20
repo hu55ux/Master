@@ -1,6 +1,7 @@
 ﻿using Hangfire;
 using Master.API.Middleware;
 using Master.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Master.API.Extensions
 {
@@ -62,11 +63,22 @@ namespace Master.API.Extensions
             using var scope = app.Services.CreateScope();
             var serviceProvider = scope.ServiceProvider;
 
-            // Seed default roles and users
-            await RoleSeeder.SeedRolesAsync(serviceProvider);
+            try
+            {
+                var context = serviceProvider.GetRequiredService<MasterDbContext>();
 
-            // Seed default skills and associated users
-            await RoleSeeder.SeedSkillsAndUsersAsync(serviceProvider);
+                await context.Database.MigrateAsync();
+
+                await RoleSeeder.SeedRolesAsync(serviceProvider);
+
+                await RoleSeeder.SeedSkillsAndUsersAsync(serviceProvider);
+            }
+            catch (Exception ex)
+            {
+                var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "Baza yaradılarkən və ya Seed edilərkən xəta baş verdi.");
+                throw;
+            }
         }
     }
 }
