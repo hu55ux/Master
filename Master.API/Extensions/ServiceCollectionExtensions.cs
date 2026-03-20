@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 using FluentValidation;
@@ -216,10 +216,9 @@ public static class ServiceCollectionExtensions
     {
         services.AddAutoMapper(typeof(MappingProfile));
 
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(MappingProfile).Assembly));
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<TokenCleanupJob>();
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Master.Application.Features.Authorization.Commands.RegisterUser.RegisterUserCommand).Assembly));
-
         services.AddScoped<IAuthRepository, AuthRepository>();
         services.AddScoped<ISkillRepository, SkillRepository>();
         services.AddScoped<IJobPostRepository, JobPostRepository>();

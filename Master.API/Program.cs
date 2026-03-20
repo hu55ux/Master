@@ -15,6 +15,6 @@ var app = builder.Build();
 
 app.UseMasterPipeline();
 
-await app.EnsureSeededAsync();
+//await app.EnsureSeededAsync();
 
 app.Run();
