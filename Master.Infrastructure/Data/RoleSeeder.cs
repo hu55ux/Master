@@ -9,6 +9,46 @@ namespace Master.Infrastructure.Data;
 /// </summary>
 public static class RoleSeeder
 {
+
+    private static readonly string[] FirstNames =
+        {
+            "Ali", "Murad", "Rashad", "Elvin", "Tural",
+            "Kamran", "Nijat", "Samir", "Orkhan", "Farid"
+        };
+
+    private static readonly string[] LastNames =
+        {
+            "Aliyev", "Mammadov", "Huseynov", "Ismayilov", "Karimov",
+            "Hasanov", "Guliyev", "Suleymanov", "Rahimov", "Abbasov"
+        };
+    private static readonly List<Skill> RealSkills = new()
+        {
+            new Skill { Name = "Plumbing", Description = "Fixing pipes, leaks, and water systems" },
+            new Skill { Name = "Electrical Repair", Description = "Wiring, lighting, and electrical fixes" },
+            new Skill { Name = "Carpentry", Description = "Woodwork, furniture, and repairs" },
+            new Skill { Name = "Painting", Description = "Interior and exterior painting" },
+            new Skill { Name = "HVAC Repair", Description = "Heating and cooling system repair" },
+            new Skill { Name = "Cleaning Service", Description = "Home and office cleaning" },
+            new Skill { Name = "Appliance Repair", Description = "Fixing washing machines, fridges, etc." },
+            new Skill { Name = "Gardening", Description = "Garden maintenance and landscaping" },
+            new Skill { Name = "Moving Service", Description = "House shifting and transport help" },
+            new Skill { Name = "IT Support", Description = "Computer and network troubleshooting" }
+        };
+
+    private static readonly string[] JobTitles =
+        {
+            "Fix leaking kitchen sink",
+            "Install new electrical sockets",
+            "Paint 2-room apartment",
+            "Repair washing machine",
+            "Clean 3-bedroom house",
+            "Assemble IKEA furniture",
+            "Fix air conditioner",
+            "Garden cleanup service",
+            "Move furniture to new apartment",
+            "Set up home WiFi network"
+        };
+
     /// <summary>
     /// Constructs the initial roles ("Admin", "User") and a default admin user with the email "
     /// </summary>
@@ -64,28 +104,34 @@ public static class RoleSeeder
     {
         var rand = new Random();
 
-        for (int i = 1; i <= count; i++)
+        for (int i = 0; i < count; i++)
         {
-            var email = $"{role.ToLower()}{i}@mail.com";
+            var firstName = FirstNames[rand.Next(FirstNames.Length)];
+            var lastName = LastNames[rand.Next(LastNames.Length)];
+            var email = $"{firstName.ToLower()}.{lastName.ToLower()}{i}@mail.com";
+
             var existingUser = await userManager.FindByEmailAsync(email);
             if (existingUser != null) continue;
+
+            var age = rand.Next(20, 50);
 
             var user = new AppUser
             {
                 UserName = email,
                 Email = email,
-                FirstName = $"{role}First{i}",
-                LastName = $"{role}Last{i}",
-                Address = $"Street {i}",
-                PhoneNumber = $"+99477{rand.Next(1000000, 9999999)}",
+                FirstName = firstName,
+                LastName = lastName,
+                Address = $"Baku, Azerbaijan",
+                PhoneNumber = $"+99470{rand.Next(1000000, 9999999)}",
                 EmailConfirmed = true,
-                Experience = (short)rand.Next(0, 10),
-                Age = (short)rand.Next(20, 50),
-                DateOfBirth = DateTimeOffset.UtcNow.AddYears(-(rand.Next(20, 50))),
+                Experience = (short)rand.Next(1, 15),
+                Age = (short)age,
+                DateOfBirth = DateTimeOffset.UtcNow.AddYears(-age),
                 CreatedAt = DateTimeOffset.UtcNow
             };
 
             var result = await userManager.CreateAsync(user, "Password123!");
+
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(user, role);
@@ -100,16 +146,7 @@ public static class RoleSeeder
 
         if (!context.Skills.Any())
         {
-            var skills = new List<Skill>();
-            for (int i = 1; i <= 50; i++)
-            {
-                skills.Add(new Skill
-                {
-                    Name = $"Skill {i}",
-                    Description = $"Description for Skill {i}"
-                });
-            }
-            context.Skills.AddRange(skills);
+            context.Skills.AddRange(RealSkills);
             await context.SaveChangesAsync();
         }
 
@@ -132,8 +169,8 @@ public static class RoleSeeder
 
         foreach (var master in masters)
         {
-            int skillCount = rand.Next(1, 6);
-            var assignedSkills = skillsList.OrderBy(s => rand.Next()).Take(skillCount).ToList();
+            int skillCount = rand.Next(1, 4);
+            var assignedSkills = skillsList.OrderBy(x => rand.Next()).Take(skillCount);
 
             foreach (var skill in assignedSkills)
             {
@@ -151,18 +188,21 @@ public static class RoleSeeder
         foreach (var client in clients)
         {
             int jobCount = rand.Next(1, 4);
-            for (int i = 1; i <= jobCount; i++)
+
+            for (int i = 0; i < jobCount; i++)
             {
                 var randomSkill = skillsList[rand.Next(skillsList.Count)];
+                var title = JobTitles[rand.Next(JobTitles.Length)];
+
                 context.JobPosts.Add(new JobPost
                 {
-                    Title = $"Job {i} for {client.FirstName}",
-                    Description = $"Description for Job {i}",
+                    Title = title,
+                    Description = $"Looking for professional to: {title.ToLower()}",
                     CustomerId = client.Id,
                     RequiredSkillId = randomSkill.Id,
-                    JPStatus = (JobPostStatus)rand.Next(Enum.GetValues(typeof(JobPostStatus)).Length),
+                    JPStatus = JobPostStatus.Active,
                     CreatedDate = DateTime.UtcNow.AddDays(-rand.Next(0, 30)),
-                    Budget = rand.Next(100, 5000)
+                    Budget = rand.Next(100, 3000)
                 });
             }
         }

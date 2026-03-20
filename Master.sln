@@ -6,10 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Master", "Master\Master.csproj", "{32F21521-C9AF-4269-8DF9-23CB9C19C8C1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Masterr", "Masterr", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
-	ProjectSection(SolutionItems) = preProject
-		Dockerfile.cs = Dockerfile.cs
-		Dockerfile.txt = Dockerfile.txt
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Master.Domain", "Master.Domain\Master.Domain.csproj", "{16F0959F-D93C-48E2-8517-24A3F2D6A54B}"
 EndProject

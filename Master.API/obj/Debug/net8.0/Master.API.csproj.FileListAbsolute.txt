@@ -371,3 +371,5 @@ C:\Users\user\Desktop\C++\Master\Master.API\bin\Debug\net8.0\Microsoft.Extension
 C:\Users\user\Desktop\C++\Master\Master.API\bin\Debug\net8.0\Microsoft.Extensions.Configuration.Abstractions.dll
 C:\Users\user\Desktop\C++\Master\Master.API\bin\Debug\net8.0\Microsoft.Extensions.Primitives.dll
 C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+C:\Users\user\Desktop\C++\Master\Master.API\bin\Debug\net8.0\Castle.Core.dll
+C:\Users\user\Desktop\C++\Master\Master.API\bin\Debug\net8.0\Moq.dll
