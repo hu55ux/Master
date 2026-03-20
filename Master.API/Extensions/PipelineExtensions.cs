@@ -29,7 +29,7 @@ namespace Master.API.Extensions
                 options.EnableTryItOutByDefault();
                 options.EnablePersistAuthorization();
 
-                options.RoutePrefix = string.Empty;
+                //options.RoutePrefix = string.Empty;
             });
 
             app.UseMiddleware<GlobalExceptionMiddleware>();
