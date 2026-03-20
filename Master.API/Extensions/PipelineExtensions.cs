@@ -18,39 +18,36 @@ namespace Master.API.Extensions
         /// <returns>The configured WebApplication instance.</returns>
         public static WebApplication UseMasterPipeline(this WebApplication app)
         {
-            if (app.Environment.IsDevelopment())
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
             {
-                app.UseSwagger();
-                app.UseSwaggerUI(options =>
-                {
-                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Master API v1");
-                    options.DisplayRequestDuration();
-                    options.EnableFilter();
-                    options.EnableDeepLinking();
-                    options.EnableTryItOutByDefault();
-                    options.EnablePersistAuthorization();
-                });
-            }
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Master API v1");
 
-            // Global exception handling middleware
+                options.DisplayRequestDuration();
+                options.EnableFilter();
+                options.EnableDeepLinking();
+                options.EnableTryItOutByDefault();
+                options.EnablePersistAuthorization();
+
+                options.RoutePrefix = string.Empty;
+            });
+
             app.UseMiddleware<GlobalExceptionMiddleware>();
 
-            // Enable CORS policy
             app.UseCors();
 
-            // Enable authentication and authorization
             app.UseAuthentication();
             app.UseAuthorization();
 
+            // Hangfire-da xəta olmaması üçün bazaya qoşulduğundan əmin olmalıyıq
             app.UseHangfireDashboard("/hangfire", new DashboardOptions
             {
                 Authorization = new[] { new HangfireAdminAuthorizationFilter() },
                 DashboardTitle = "Master API - Job Manager",
-                AppPath = "/" // "Back to site" linki üçün
+                AppPath = "/"
             });
             app.UseHangfireJobs();
 
-            // Map controller endpoints
             app.MapControllers();
 
             return app;
