@@ -5,8 +5,6 @@ VisualStudioVersion = 17.14.37012.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Master", "Master\Master.csproj", "{32F21521-C9AF-4269-8DF9-23CB9C19C8C1}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Masterr", "Masterr", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Master.Domain", "Master.Domain\Master.Domain.csproj", "{16F0959F-D93C-48E2-8517-24A3F2D6A54B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Master.Application", "Master.Application\Master.Application.csproj", "{BA6F6509-30BD-4167-BDDA-59C2858C88DE}"
@@ -102,13 +100,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{16F0959F-D93C-48E2-8517-24A3F2D6A54B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{BA6F6509-30BD-4167-BDDA-59C2858C88DE} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{6E2D62B7-CFEE-46A0-83B9-8E363BE3E282} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{B831EC74-5E31-42DE-A4E1-5397B22D706B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{8D9B0647-8596-425E-B2FB-21F3172B0F0E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3EB52486-FD2C-4B32-B3B0-08E46CD5E888}
