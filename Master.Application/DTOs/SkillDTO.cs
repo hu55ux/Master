@@ -38,6 +38,11 @@
     public class SkillResponseDTO
     {
         /// <summary>
+        /// Id of the skill that returned.
+        /// </summary>
+
+        public Guid Id { get; set; }
+        /// <summary>
         /// Gets or sets the name of the skill.
         /// </summary>
         public string Name { get; set; } = string.Empty;

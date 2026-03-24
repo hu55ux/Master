@@ -15,7 +15,7 @@ public class ChangeJobStatusHandler : IRequestHandler<ChangeJobStatusCommand, bo
 
     public async Task<bool> Handle(ChangeJobStatusCommand command, CancellationToken ct)
     {
-        var job = await _jobRepository.GetByIdAndCustomerIdAsync(command.JobId, command.ClientId, ct);
+        var job = await _jobRepository.GetByIdAndCustomerIdAsync(command.JobId, command.CustomerId, ct);
 
         if (job == null)
             throw new KeyNotFoundException($"Job not found or unauthorized: {command.JobId}");

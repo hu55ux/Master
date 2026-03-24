@@ -1,4 +1,5 @@
-﻿using Master.Application.Interfaces;
+﻿using Master.Application.DTOs;
+using Master.Application.Interfaces;
 using Master.Application.Models;
 using Master.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
@@ -38,6 +39,7 @@ public class AuthRepository : IAuthRepository
          .Include(u => u.JobPosts)
          .FirstOrDefaultAsync(u => u.Id == userId, ct);
     }
+
 
     public async Task<IdentityResult> FullDeleteUserAsync(AppUser user, CancellationToken ct)
     {

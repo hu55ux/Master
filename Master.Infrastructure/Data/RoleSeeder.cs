@@ -69,7 +69,7 @@ public static class RoleSeeder
             }
         }
 
-        var adminEmail = "admin@Master.Infrastructurecom";
+        var adminEmail = "admin@Master.com";
         var adminPassword = "Admin123!";
 
         var existingAdmin = await userManager.FindByEmailAsync(adminEmail);

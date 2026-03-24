@@ -8,6 +8,8 @@ using Master.Application.Features.Authorization.Commands.LoginUser;
 using Master.Application.Features.Authorization.Commands.RefreshToken;
 using Master.Application.Features.Authorization.Commands.RegisterUser;
 using Master.Application.Features.Authorization.Commands.RevokeToken;
+using Master.Application.Features.Authorization.Queries.GetUserById;
+using Master.Application.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -65,6 +67,19 @@ public class AuthController : ControllerBase
         });
 
         return Ok(ApiResponse<AuthResponseDTO>.SuccessResponse(result, "Login successful."));
+    }
+
+    /// <summary>
+    /// Gets the authenticated user's profile information. This endpoint retrieves the user's details such as name, email, address, and other relevant information based on their unique identifier (userId).
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    [HttpPost("id/{userId:guid}")]
+    [ProducesResponseType(typeof(ApiResponse<AuthResponseDTO>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<AppUser>>> GetById(Guid userId)
+    {
+        var result = await _mediator.Send(new GetUserByIdQuery(userId));
+        return Ok(ApiResponse<AuthResponseDTO>.SuccessResponse(result, "User retrieved successfully."));
     }
 
     /// <summary>

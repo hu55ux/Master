@@ -35,7 +35,9 @@ namespace Master.API.Extensions
 
             app.UseMiddleware<GlobalExceptionMiddleware>();
 
-            app.UseCors();
+            app.UseRouting();
+
+            app.UseCors("DevCors");
 
             app.UseAuthentication();
             app.UseAuthorization();

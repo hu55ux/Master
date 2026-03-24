@@ -142,5 +142,28 @@ public class JobPostRepository : IJobPostRepository
             _ => query.OrderByDescending(j => j.Id)
         };
     }
+    public async Task<IEnumerable<JobPost>> GetJobsByUserIdAsync(Guid userId, bool onlyActive, CancellationToken ct)
+    {
+        var query = _context.JobPosts
+            .Include(j => j.Customer)
+            .Include(j => j.RequiredSkill)
+            .Where(j => j.CustomerId == userId);
+
+        if (onlyActive)
+        {
+            query = query.Where(j => j.JPStatus == JobPostStatus.Active);
+        }
+
+        return await query.AsNoTracking().ToListAsync(ct);
+    }
+
+    public async Task<AppUser?> GetCustomerByJobIdAsync(Guid jobId, CancellationToken ct)
+    {
+        var job = await _context.JobPosts
+            .Include(j => j.Customer)
+            .FirstOrDefaultAsync(j => j.Id == jobId, ct);
+
+        return job?.Customer;
+    }
 }
 

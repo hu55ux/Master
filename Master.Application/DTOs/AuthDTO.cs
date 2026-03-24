@@ -1,4 +1,4 @@
-﻿namespace Master.Application.DTOs;
+namespace Master.Application.DTOs;
 
 /// <summary>
 /// RegisterRequest: This class represents the data transfer object (DTO) for user registration.
@@ -90,6 +90,10 @@ public class LoginRequest
 /// </summary>
 public class AuthResponseDTO
 {
+    /// <summary>
+    /// User identifier
+    /// </summary>
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Access token

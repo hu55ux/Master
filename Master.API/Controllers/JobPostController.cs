@@ -7,8 +7,9 @@ using Master.Application.Features.JobPosts.Commands.UpdateJob;
 using Master.Application.Features.JobPosts.Queries.GetActiveJobs;
 using Master.Application.Features.JobPosts.Queries.GetAllJobs;
 using Master.Application.Features.JobPosts.Queries.GetJobById;
-using Master.Application.Features.JobPosts.Queries.GetMyJobs;
+using Master.Application.Features.JobPosts.Queries.GetJobsByUser;
 using Master.Application.Features.JobPosts.Queries.GetPagedJobs;
+using Master.Application.Features.JobPosts.Queries.GetUserByJob;
 using Master.Application.Models;
 using Master.Features.JobPosts.Commands.DeleteJob;
 using MediatR;
@@ -56,7 +57,7 @@ public class JobPostController : ControllerBase
     /// Retrieves all available job posts without pagination.
     /// </summary>
     /// <returns>A collection of all job posts.</returns>
-    [HttpGet]
+    [HttpGet("all")]
     [AllowAnonymous]
     public async Task<IActionResult> GetAll()
         => Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(await _mediator.Send(new GetAllJobsQuery())));
@@ -72,12 +73,27 @@ public class JobPostController : ControllerBase
         => Ok(ApiResponse<JobPostResponseDTO>.SuccessResponse(await _mediator.Send(new GetJobByIdQuery(id))));
 
     /// <summary>
-    /// Retrieves all job posts created by the currently authenticated customer.
+    /// Gets all job posts created by the currently authenticated user, with an option to filter only active jobs.
     /// </summary>
-    /// <returns>A collection of job posts belonging to the current user.</returns>
     [HttpGet("myJobs")]
     public async Task<IActionResult> GetMyJobs()
-        => Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(await _mediator.Send(new GetMyJobsQuery(UserId))));
+        => Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(await _mediator.Send(new GetJobsByUserIdQuery(UserId, true))));
+
+    /// <summary>
+    /// Get all job posts created by a specific user, with an option to filter only active jobs. This endpoint is accessible without authentication.
+    /// </summary>
+    [HttpGet("user/{userId:guid}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetByUserId(Guid userId)
+        => Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(await _mediator.Send(new GetJobsByUserIdQuery(userId, false))));
+
+    /// <summary>
+    /// Gets the owner (customer) details of a specific job post by its unique identifier. This endpoint is accessible without authentication.
+    /// </summary>
+    [HttpGet("{id}/owner")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetOwnerByJob(Guid id)
+        => Ok(ApiResponse<AuthResponseDTO>.SuccessResponse(await _mediator.Send(new GetUserByJobIdQuery(id))));
 
     /// <summary>
     /// Retrieves active job posts filtered by a specific required skill.

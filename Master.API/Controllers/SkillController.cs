@@ -7,8 +7,6 @@ using Master.Application.Features.Skills.Commands.CreateSkill;
 using Master.Application.Features.Skills.Commands.RemoveSkill;
 using Master.Application.Features.Skills.Commands.UpdateSkill;
 using Master.Application.Features.Skills.Queries.GetAllSkills;
-using Master.Application.Features.Skills.Queries.GetById;
-using Master.Application.Features.Skills.Queries.GetMastersBySkill;
 using Master.Application.Features.Skills.Queries.GetMySkilss;
 using Master.Application.Features.Skills.Queries.GetPagedResult;
 using MediatR;
@@ -89,7 +87,7 @@ public class SkillController : ControllerBase
     /// Assigns skills to the current user's profile. Requires a 'Master' role or valid profile.
     /// </summary>
     [HttpPost("assignMe")]
-    [Authorize(Policy =AuthPolicies.MasterOrAdmin)]
+    [Authorize(Policy = AuthPolicies.MasterOrAdmin)]
     public async Task<ActionResult<ApiResponse<bool>>> AssignToMe([FromBody] List<Guid> skillIds)
     {
         var result = await _mediator.Send(new AssignSkillsToMasterCommand(UserId, skillIds));
@@ -100,7 +98,7 @@ public class SkillController : ControllerBase
     /// Removes a skill from the current user's profile.
     /// </summary>
     [HttpDelete("removeSkill/{skillId}")]
-    [Authorize(Roles =AuthPolicies.MasterOrAdmin)]
+    [Authorize(Roles = AuthPolicies.MasterOrAdmin)]
     public async Task<ActionResult<ApiResponse<bool>>> RemoveFromMe(Guid skillId)
     {
         var result = await _mediator.Send(new RemoveSkillCommand(UserId, skillId));
@@ -116,4 +114,6 @@ public class SkillController : ControllerBase
         var result = await _mediator.Send(new GetMySkillsQuery(UserId));
         return Ok(ApiResponse<IEnumerable<SkillResponseDTO>>.SuccessResponse(result));
     }
+
+    //[HttpGet("byUser/{userId:guid}")]
 }

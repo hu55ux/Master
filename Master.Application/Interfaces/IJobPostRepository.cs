@@ -16,4 +16,6 @@ public interface IJobPostRepository
     Task<JobPost?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct);
     Task<IEnumerable<JobPost>> GetJobsByCustomerIdAsync(Guid customerId, CancellationToken ct);
     Task<(IEnumerable<JobPost> Items, int TotalCount)> GetPagedJobsAsync(JobPostQuery query, CancellationToken ct);
+    Task<IEnumerable<JobPost>> GetJobsByUserIdAsync(Guid userId, bool onlyActive, CancellationToken ct);
+    Task<AppUser?> GetCustomerByJobIdAsync(Guid jobId, CancellationToken ct);
 }

@@ -4,11 +4,11 @@ using System.Text.Json.Serialization;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Hangfire;
+using Master.Application.Interfaces;
 using Master.Application.Mapping;
 using Master.Application.Models;
 using Master.Application.Services;
 using Master.Application.Validators;
-using Master.Application.Interfaces;
 using Master.Infrastructure.BackgroundJobs;
 using Master.Infrastructure.Config;
 using Master.Infrastructure.Data;
@@ -188,16 +188,17 @@ public static class ServiceCollectionExtensions
     {
         services.AddCors(options =>
         {
-            options.AddDefaultPolicy(policy => policy
-                .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173")
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials());
+            options.AddPolicy("DevCors", policy =>
+            {
+                policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials();
+            });
         });
 
         return services;
     }
-
     /// <summary>
     /// Adds FluentValidation support and registers validators from the assembly.
     /// </summary>
