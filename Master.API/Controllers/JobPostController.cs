@@ -8,6 +8,7 @@ using Master.Application.Features.JobPosts.Queries.GetActiveJobs;
 using Master.Application.Features.JobPosts.Queries.GetAllJobs;
 using Master.Application.Features.JobPosts.Queries.GetJobById;
 using Master.Application.Features.JobPosts.Queries.GetJobsByUser;
+using Master.Application.Features.JobPosts.Queries.GetJobStatuses;
 using Master.Application.Features.JobPosts.Queries.GetPagedJobs;
 using Master.Application.Features.JobPosts.Queries.GetUserByJob;
 using Master.Application.Models;
@@ -145,4 +146,12 @@ public class JobPostController : ControllerBase
         await _mediator.Send(new DeleteJobCommand(id, UserId));
         return Ok(ApiResponse<string>.SuccessResponse("Job post deleted successfully."));
     }
+
+    /// <summary>
+    /// Gets a list of all possible job statuses that can be assigned to a job post. This is useful for populating dropdowns or selection lists in the client application.
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("statuses")]
+    public async Task<IActionResult> GetStatuses()
+    => Ok(ApiResponse<List<JobStatusLookupDto>>.SuccessResponse(await _mediator.Send(new GetJobStatusLookupQuery())));
 }

@@ -376,6 +376,16 @@
   },
   {
     "ContainingType": "Master.Api.Controllers.JobPostController",
+    "Method": "GetStatuses",
+    "RelativePath": "api/JobPost/statuses",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Master.Api.Controllers.JobPostController",
     "Method": "GetByUserId",
     "RelativePath": "api/JobPost/user/{userId}",
     "HttpMethod": "GET",

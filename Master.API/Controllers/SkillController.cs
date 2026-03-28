@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Master.API.Extensions;
 using Master.Application.Common;
 using Master.Application.DTOs;
@@ -98,7 +98,7 @@ public class SkillController : ControllerBase
     /// Removes a skill from the current user's profile.
     /// </summary>
     [HttpDelete("removeSkill/{skillId}")]
-    [Authorize(Roles = AuthPolicies.MasterOrAdmin)]
+    [Authorize(Policy = AuthPolicies.MasterOrAdmin)]
     public async Task<ActionResult<ApiResponse<bool>>> RemoveFromMe(Guid skillId)
     {
         var result = await _mediator.Send(new RemoveSkillCommand(UserId, skillId));

@@ -1,4 +1,6 @@
-﻿namespace Master.Application.DTOs
+﻿using Master.Application.Models;
+
+namespace Master.Application.DTOs
 {
     /// <summary>
     /// Data Transfer Object for creating a new job post.
@@ -139,7 +141,7 @@ public class JobPostQuery
     /// <summary>
     /// Invoice status for filtering results. Common values include "Created", "Sent", "Paid", "Cancelled", etc.
     /// </summary>
-    public string Status { get; set; } = string.Empty;
+    public JobPostStatus? Status { get; set; }
 
     public void Validate()
     {
@@ -156,3 +158,11 @@ public class JobPostQuery
         if (SortDirection != "asc" && SortDirection != "desc") SortDirection = "asc";
     }
 }
+
+/// <summary>
+/// Job status lookup DTO for returning job status information to clients. This is used to provide a simple representation of job statuses, typically for dropdowns or selection lists in the UI.
+/// </summary>
+/// <param name="Id"></param>
+/// <param name="Name"></param>
+public record JobStatusLookupDto(int Id, string Name);
+

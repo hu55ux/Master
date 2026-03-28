@@ -105,16 +105,16 @@ public class JobPostRepository : IJobPostRepository
 
         if (!string.IsNullOrWhiteSpace(query.SearchTerm))
         {
-            var term = query.SearchTerm.Trim().ToLower();
+            var term = query.SearchTerm.Trim();
             jobQuery = jobQuery.Where(j =>
-                j.Title.ToLower().Contains(term) ||
-                j.Description.ToLower().Contains(term) ||
-                j.Customer.UserName.ToLower().Contains(term));
+                j.Title.Contains(term) ||
+                j.Description.Contains(term) ||
+                j.Customer.UserName.Contains(term));
         }
 
-        if (!string.IsNullOrWhiteSpace(query.Status))
+        if (query.Status.HasValue)
         {
-            jobQuery = jobQuery.Where(j => j.JPStatus.ToString() == query.Status);
+            jobQuery = jobQuery.Where(j => j.JPStatus == query.Status.Value);
         }
 
         jobQuery = ApplySorting(jobQuery, query.Sort, query.SortDirection);
