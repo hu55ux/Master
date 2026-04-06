@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Master.API.Extensions;
+using Master.Domain.Constants;
 using Master.Application.Common;
 using Master.Application.DTOs;
 using Master.Application.Features.Skills.Commands.AssignSkills;

@@ -1,9 +1,9 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using FluentAssertions;
 using Master.Application.DTOs;
 using Master.Application.Features.Authorization.Commands.RefreshToken;
 using Master.Application.Interfaces;
-using Master.Application.Models;
+using Master.Domain.Models;
 using Master.Application.Services;
 using Moq;
 

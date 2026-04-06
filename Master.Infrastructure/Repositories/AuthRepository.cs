@@ -1,6 +1,6 @@
-﻿using Master.Application.DTOs;
+using Master.Application.DTOs;
 using Master.Application.Interfaces;
-using Master.Application.Models;
+using Master.Domain.Models;
 using Master.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

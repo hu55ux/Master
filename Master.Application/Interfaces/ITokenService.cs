@@ -1,6 +1,6 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Master.Application.DTOs;
-using Master.Application.Models;
+using Master.Domain.Models;
 
 namespace Master.Application.Services;
 public interface ITokenService

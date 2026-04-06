@@ -1,4 +1,4 @@
-﻿namespace Master.API.Extensions
+namespace Master.Domain.Constants
 {
     /// <summary>
     /// Defines application roles used for authentication and authorization.

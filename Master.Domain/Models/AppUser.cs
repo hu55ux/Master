@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 
-namespace Master.Application.Models;
+namespace Master.Domain.Models;
 
 /// <summary>
 /// Represents an application user in the system.
@@ -58,6 +58,16 @@ public class AppUser : IdentityUser<Guid>
     public DateTimeOffset? UpdatedAt { get; set; }
 
     /// <summary>
+    /// Average rating received by the master, calculated from all ratings given by customers.
+    /// </summary>
+    public decimal AverageRating { get; set; }
+
+    /// <summary>
+    /// Total number of ratings received by the master (Məsələn: 150).
+    /// </summary>
+    public int RatingCount { get; set; }
+
+    /// <summary>
     /// Navigation property representing the skills owned by the user.
     /// </summary>
     /// <remarks>
@@ -72,4 +82,16 @@ public class AppUser : IdentityUser<Guid>
     /// These are the job requests posted by the user acting as a customer.
     /// </remarks>
     public ICollection<JobPost> JobPosts { get; set; } = new List<JobPost>();
+
+    /// <summary>
+    /// User's received ratings as a master. This collection contains all the ratings given 
+    /// by customers to this user in their role as a master.
+    /// </summary>
+    public virtual ICollection<MasterRating> ReceivedRatings { get; set; } = new List<MasterRating>();
+
+    /// <summary>
+    /// Given ratings by the user as a customer. This collection contains all the ratings that this user has given
+    /// </summary>
+    public virtual ICollection<MasterRating> GivenRatings { get; set; } = new List<MasterRating>();
+
 }

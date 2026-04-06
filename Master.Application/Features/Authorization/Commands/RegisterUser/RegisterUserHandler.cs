@@ -1,10 +1,10 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Master.Application.DTOs;
 using Master.Application.Interfaces;
-using Master.Application.Models;
+using Master.Domain.Models;
 using Master.Application.Services;
 using MediatR;
-
+using Master.Domain.Constants;
 
 namespace Master.Application.Features.Authorization.Commands.RegisterUser;
 
@@ -33,7 +33,7 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResp
         if (!result.Succeeded)
             throw new InvalidOperationException($"User creation failed: {string.Join(", ", result.Errors.Select(e => e.Description))}");
 
-        string roleToAssign = request.Request.Role == "Master" ? "Master" : "Customer";
+        string roleToAssign = request.Request.Role == UserRoles.Master ? UserRoles.Master : UserRoles.Client;
 
         if (!await _authRepository.RoleExistsAsync(roleToAssign))
             await _authRepository.CreateRoleAsync(roleToAssign);

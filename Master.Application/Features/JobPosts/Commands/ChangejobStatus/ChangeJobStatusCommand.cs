@@ -1,4 +1,4 @@
-﻿using Master.Application.Models;
+using Master.Domain.Models;
 using MediatR;
 
 namespace Master.Application.Features.JobPosts.Commands.ChangejobStatus;

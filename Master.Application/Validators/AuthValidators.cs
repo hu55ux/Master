@@ -1,5 +1,6 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Master.Application.DTOs;
+using Master.Domain.Constants;
 
 namespace Master.Application.Validators;
 
@@ -35,7 +36,7 @@ public class LoginRequestValidator : AbstractValidator<LoginRequest>
 /// </summary>
 public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 {
-    private readonly string[] _allowedRoles = { "Master", "Customer" };
+    private readonly string[] _allowedRoles = { UserRoles.Master, UserRoles.Client };
     /// <summary>
     /// Constructor that sets up validation rules for user registration, including checks for name length, email format, password strength, and confirmation match.
     /// </summary>

@@ -1,7 +1,7 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Master.Application.DTOs;
 using Master.Application.Interfaces;
-using Master.Application.Models;
+using Master.Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 

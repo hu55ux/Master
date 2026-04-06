@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Master.Application.Common;
 using Master.Application.DTOs;
 using Master.Application.Features.Authorization.Commands.ChangePassword;
@@ -9,7 +9,7 @@ using Master.Application.Features.Authorization.Commands.RefreshToken;
 using Master.Application.Features.Authorization.Commands.RegisterUser;
 using Master.Application.Features.Authorization.Commands.RevokeToken;
 using Master.Application.Features.Authorization.Queries.GetUserById;
-using Master.Application.Models;
+using Master.Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

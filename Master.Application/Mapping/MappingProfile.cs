@@ -1,6 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Master.Application.DTOs;
-using Master.Application.Models;
+using Master.Domain.Models;
 
 namespace Master.Application.Mapping
 {
@@ -23,6 +23,7 @@ namespace Master.Application.Mapping
 
             // AppUser -> AuthResponseDTO mapping
             CreateMap<AppUser, AuthResponseDTO>()
+                .ForMember(dest => dest.AverageScore, opt => opt.MapFrom(src => src.AverageRating))
                 .ForMember(dest => dest.AccessToken, opt => opt.Ignore())
                 .ForMember(dest => dest.RefreshToken, opt => opt.Ignore())
                 .ForMember(dest => dest.ExpiresAt, opt => opt.Ignore())
@@ -63,6 +64,25 @@ namespace Master.Application.Mapping
             // Skill update mapping (ignores nulls)
             CreateMap<UpdateSkillDTO, Skill>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            // CreateDTO -> Entity mapping
+            CreateMap<CreateMasterRatingDTO, MasterRating>()
+                // Əgər ClientId DTO-da CustomerId kimi gəlirsə, onu map edirik
+                .ForMember(dest => dest.CustomerId, opt => opt.MapFrom(src => src.CustomerId));
+
+            // UpdateDTO -> Entity mapping
+            CreateMap<UpdateMasterRatingDTO, MasterRating>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            // Entity -> ResponseDTO mapping
+            CreateMap<MasterRating, MasterRatingResponseDTO>()
+                .ForMember(dest => dest.CustomerId, opt => opt.MapFrom(src => src.CustomerId))
+                // Ustanın adı (FirstName + LastName birləşməsini tövsiyə edirəm)
+                .ForMember(dest => dest.MasterName, opt => opt.MapFrom(src =>
+                    src.Master != null ? $"{src.Master.FirstName} {src.Master.LastName}" : "Unknown Master"))
+                // Müştərinin adı
+                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src =>
+                    src.Customer != null ? $"{src.Customer.FirstName} {src.Customer.LastName}" : "Unknown Customer"));
         }
     }
 }

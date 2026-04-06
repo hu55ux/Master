@@ -1,4 +1,4 @@
-﻿using Master.Application.Models;
+using Master.Domain.Models;
 
 namespace Master.Application.Interfaces;
 

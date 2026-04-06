@@ -1,4 +1,4 @@
-﻿using Master.Application.Models;
+using Master.Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,6 +48,24 @@ public static class RoleSeeder
             "Move furniture to new apartment",
             "Set up home WiFi network"
         };
+
+    private static readonly string[] PositiveComments =
+    {
+        "Excellent service, highly professional!",
+        "Great experience, would hire again.",
+        "The master did a fantastic job, very satisfied.",
+        "Fast, efficient and polite. 5 stars!",
+        "High quality work and fair pricing."
+    };
+
+    private static readonly string[] NegativeComments =
+    {
+        "Very poor service, arrived very late.",
+        "Unprofessional behavior and sloppy work.",
+        "Prices were much higher than quoted.",
+        "Did not finish the task as agreed.",
+        "The quality of work was extremely disappointing."
+    };
 
     /// <summary>
     /// Constructs the initial roles ("Admin", "User") and a default admin user with the email "
@@ -124,7 +142,7 @@ public static class RoleSeeder
                 Address = $"Baku, Azerbaijan",
                 PhoneNumber = $"+99470{rand.Next(1000000, 9999999)}",
                 EmailConfirmed = true,
-                Experience = (short)rand.Next(1, 15),
+                Experience = role == "Master" ? (short)rand.Next(1, 15) : (short)0,
                 Age = (short)age,
                 DateOfBirth = DateTimeOffset.UtcNow.AddYears(-age),
                 CreatedAt = DateTimeOffset.UtcNow
@@ -207,6 +225,71 @@ public static class RoleSeeder
             }
         }
 
+        await context.SaveChangesAsync();
+    }
+    public static async Task SeedRatingsAsync(IServiceProvider serviceProvider)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<MasterDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+        var rand = new Random();
+
+        if (await context.MasterRatings.AnyAsync()) return;
+
+        var allUsers = await userManager.Users.ToListAsync();
+        var masters = new List<AppUser>();
+        var clients = new List<AppUser>();
+
+        foreach (var user in allUsers)
+        {
+            if (await userManager.IsInRoleAsync(user, "Master"))
+                masters.Add(user);
+            else if (await userManager.IsInRoleAsync(user, "Client"))
+                clients.Add(user);
+        }
+
+        if (!masters.Any() || !clients.Any()) return;
+
+        bool hasRatings = await context.MasterRatings.AnyAsync();
+
+        if (!hasRatings)
+        {
+            foreach (var master in masters)
+            {
+                // Each master gets 2-5 random ratings
+                int ratingCount = rand.Next(2, 6);
+                var selectedClients = clients.OrderBy(x => rand.Next()).Take(ratingCount).ToList();
+
+                foreach (var client in selectedClients)
+                {
+                    bool isPositive = rand.NextDouble() < 0.8; // 80% positive
+                    int score = isPositive ? rand.Next(4, 6) : rand.Next(1, 3);
+                    string comment = isPositive 
+                        ? PositiveComments[rand.Next(PositiveComments.Length)]
+                        : NegativeComments[rand.Next(NegativeComments.Length)];
+
+                    var rating = new MasterRating
+                    {
+                        MasterId = master.Id,
+                        CustomerId = client.Id,
+                        Score = score,
+                        Comment = comment,
+                        CreatedAt = DateTime.UtcNow.AddDays(-rand.Next(1, 30))
+                    };
+                    context.MasterRatings.Add(rating);
+                }
+            }
+            await context.SaveChangesAsync();
+        }
+
+        // Always update master statistics to ensure old data has their average rating set
+        foreach (var master in masters)
+        {
+            var ratings = await context.MasterRatings.Where(r => r.MasterId == master.Id).ToListAsync();
+            master.RatingCount = ratings.Count;
+            master.AverageRating = ratings.Any() ? (decimal)ratings.Average(r => (double)r.Score) : 0;
+            master.UpdatedAt = DateTimeOffset.UtcNow;
+        }
         await context.SaveChangesAsync();
     }
 }

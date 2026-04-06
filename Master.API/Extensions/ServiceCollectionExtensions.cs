@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 using FluentValidation;
@@ -6,9 +6,10 @@ using FluentValidation.AspNetCore;
 using Hangfire;
 using Master.Application.Interfaces;
 using Master.Application.Mapping;
-using Master.Application.Models;
+using Master.Domain.Models;
 using Master.Application.Services;
 using Master.Application.Validators;
+using Master.Domain.Constants;
 using Master.Infrastructure.BackgroundJobs;
 using Master.Infrastructure.Config;
 using Master.Infrastructure.Data;
@@ -33,8 +34,11 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDataContext(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnectionString");
+
         services.AddDbContext<MasterDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseSqlServer(connectionString,
+                builder => builder.MigrationsAssembly("Master.Infrastructure")));
+
         return services;
     }
 
@@ -223,6 +227,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthRepository, AuthRepository>();
         services.AddScoped<ISkillRepository, SkillRepository>();
         services.AddScoped<IJobPostRepository, JobPostRepository>();
+        services.AddScoped<IMasterRatingRepository, MasterRatingRepository>();
 
         return services;
     }

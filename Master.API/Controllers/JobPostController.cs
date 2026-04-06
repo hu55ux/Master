@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Master.Application.Common;
 using Master.Application.DTOs;
 using Master.Application.Features.JobPosts.Commands.ChangejobStatus;
@@ -11,7 +11,7 @@ using Master.Application.Features.JobPosts.Queries.GetJobsByUser;
 using Master.Application.Features.JobPosts.Queries.GetJobStatuses;
 using Master.Application.Features.JobPosts.Queries.GetPagedJobs;
 using Master.Application.Features.JobPosts.Queries.GetUserByJob;
-using Master.Application.Models;
+using Master.Domain.Models;
 using Master.Features.JobPosts.Commands.DeleteJob;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

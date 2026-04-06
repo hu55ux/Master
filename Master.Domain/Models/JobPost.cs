@@ -1,4 +1,4 @@
-﻿namespace Master.Application.Models;
+namespace Master.Domain.Models;
 
 /// <summary>
 /// Represents a job post created by a customer requesting a specific service.

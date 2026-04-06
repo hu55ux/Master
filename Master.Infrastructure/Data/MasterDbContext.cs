@@ -1,4 +1,4 @@
-﻿using Master.Application.Models;
+using Master.Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +39,11 @@ public class MasterDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Gu
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     /// <summary>
+    /// Gets or sets the master ratings given by customers to masters.
+    /// </summary>
+    public DbSet<MasterRating> MasterRatings => Set<MasterRating>();
+
+    /// <summary>
     /// Configures the schema needed for the Master database context.
     /// </summary>
     /// <param name="builder">The model builder to configure entities.</param>
@@ -54,6 +59,7 @@ public class MasterDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Gu
             entity.Property(u => u.Address).HasMaxLength(250);
             entity.Property(u => u.Experience).HasDefaultValue(0);
             entity.Ignore(u => u.Age);
+            entity.Property(u => u.AverageRating).HasPrecision(18, 2);
             entity.Property(u => u.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
         });
 
@@ -100,5 +106,23 @@ public class MasterDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Gu
             refresh.Property(rt => rt.JwtId).IsRequired().HasMaxLength(64);
             refresh.Property(rt => rt.UserId).IsRequired().HasMaxLength(450);
         });
+
+        builder.Entity<MasterRating>()
+        .HasKey(r => new { r.MasterId, r.CustomerId });
+
+        builder.Entity<MasterRating>()
+            .Property(r => r.Score).HasPrecision(18, 2);
+
+        builder.Entity<MasterRating>()
+            .HasOne(r => r.Master)
+            .WithMany(u => u.ReceivedRatings)
+            .HasForeignKey(r => r.MasterId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<MasterRating>()
+            .HasOne(r => r.Customer)
+            .WithMany(u => u.GivenRatings)
+            .HasForeignKey(r => r.CustomerId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

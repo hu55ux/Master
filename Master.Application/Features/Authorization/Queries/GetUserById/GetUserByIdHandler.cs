@@ -1,6 +1,6 @@
-﻿using Master.Application.DTOs;
+using Master.Application.DTOs;
 using Master.Application.Interfaces;
-using Master.Application.Models;
+using Master.Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
@@ -30,6 +30,7 @@ public class GetUserByIdHandler : IRequestHandler<GetUserByIdQuery, AuthResponse
 
         return new AuthResponseDTO
         {
+            Id = user.Id,
             Email = user.Email,
             AccessToken = null, // Access token is not generated in this query, it can be generated in a separate authentication process
             RefreshToken = null, // Refresh token is not generated in this query, it can be generated in a separate authentication process
@@ -40,6 +41,7 @@ public class GetUserByIdHandler : IRequestHandler<GetUserByIdQuery, AuthResponse
             PhoneNumber = user.PhoneNumber,
             Experience = user.Experience,
             DateOfBirth = user.DateOfBirth,
+            AverageScore = user.AverageRating,
             Roles = roles.ToList()
         };
     }

@@ -1,9 +1,9 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
 using Master.Application.DTOs;
-using Master.Application.Models;
+using Master.Domain.Models;
 using Master.Application.Services;
 using Master.Infrastructure.Config;
 using Master.Infrastructure.Data;

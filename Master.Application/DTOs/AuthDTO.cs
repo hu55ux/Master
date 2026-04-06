@@ -150,6 +150,11 @@ public class AuthResponseDTO
     public DateTimeOffset DateOfBirth { get; set; }
 
     /// <summary>
+    /// Average score/rating of the user.
+    /// </summary>
+    public decimal AverageScore { get; set; }
+
+    /// <summary>
     /// Roles of the user. This property is a collection of 
     /// strings that represents the roles assigned to the authenticated user.
     /// </summary>

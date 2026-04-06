@@ -1,4 +1,4 @@
-﻿namespace Master.Application.DTOs
+namespace Master.Application.DTOs
 {
     /// <summary>
     /// Data Transfer Object for creating a new skill.
@@ -54,6 +54,9 @@
     }
 }
 
+/// <summary>
+/// Represents the query parameters for filtering and paginating skills.
+/// </summary>
 public class SkillQuery
 {
     /// <summary>

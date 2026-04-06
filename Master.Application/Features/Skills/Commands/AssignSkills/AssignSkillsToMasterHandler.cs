@@ -1,5 +1,5 @@
-﻿using Master.Application.Interfaces;
-using Master.Application.Models;
+using Master.Application.Interfaces;
+using Master.Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

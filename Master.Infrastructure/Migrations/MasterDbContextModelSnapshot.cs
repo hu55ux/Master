@@ -22,7 +22,7 @@ namespace Master.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Master.Application.Models.AppUser", b =>
+            modelBuilder.Entity("Master.Domain.Models.AppUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -35,6 +35,10 @@ namespace Master.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
+
+                    b.Property<decimal>("AverageRating")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -93,6 +97,9 @@ namespace Master.Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<int>("RatingCount")
+                        .HasColumnType("int");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -119,7 +126,7 @@ namespace Master.Infrastructure.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Master.Application.Models.JobPost", b =>
+            modelBuilder.Entity("Master.Domain.Models.JobPost", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -158,7 +165,32 @@ namespace Master.Infrastructure.Migrations
                     b.ToTable("JobPosts");
                 });
 
-            modelBuilder.Entity("Master.Application.Models.RefreshToken", b =>
+            modelBuilder.Entity("Master.Domain.Models.MasterRating", b =>
+                {
+                    b.Property<Guid>("MasterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Score")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("MasterId", "CustomerId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("MasterRatings");
+                });
+
+            modelBuilder.Entity("Master.Domain.Models.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -196,7 +228,7 @@ namespace Master.Infrastructure.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("Master.Application.Models.Skill", b =>
+            modelBuilder.Entity("Master.Domain.Models.Skill", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -215,7 +247,7 @@ namespace Master.Infrastructure.Migrations
                     b.ToTable("Skills");
                 });
 
-            modelBuilder.Entity("Master.Application.Models.UserSkill", b =>
+            modelBuilder.Entity("Master.Domain.Models.UserSkill", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -361,15 +393,15 @@ namespace Master.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Master.Application.Models.JobPost", b =>
+            modelBuilder.Entity("Master.Domain.Models.JobPost", b =>
                 {
-                    b.HasOne("Master.Application.Models.AppUser", "Customer")
+                    b.HasOne("Master.Domain.Models.AppUser", "Customer")
                         .WithMany("JobPosts")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Master.Application.Models.Skill", "RequiredSkill")
+                    b.HasOne("Master.Domain.Models.Skill", "RequiredSkill")
                         .WithMany("JobPosts")
                         .HasForeignKey("RequiredSkillId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -380,15 +412,34 @@ namespace Master.Infrastructure.Migrations
                     b.Navigation("RequiredSkill");
                 });
 
-            modelBuilder.Entity("Master.Application.Models.UserSkill", b =>
+            modelBuilder.Entity("Master.Domain.Models.MasterRating", b =>
                 {
-                    b.HasOne("Master.Application.Models.Skill", "Skill")
+                    b.HasOne("Master.Domain.Models.AppUser", "Customer")
+                        .WithMany("GivenRatings")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Master.Domain.Models.AppUser", "Master")
+                        .WithMany("ReceivedRatings")
+                        .HasForeignKey("MasterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Master");
+                });
+
+            modelBuilder.Entity("Master.Domain.Models.UserSkill", b =>
+                {
+                    b.HasOne("Master.Domain.Models.Skill", "Skill")
                         .WithMany("UserSkills")
                         .HasForeignKey("SkillId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Master.Application.Models.AppUser", "User")
+                    b.HasOne("Master.Domain.Models.AppUser", "User")
                         .WithMany("UserSkills")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -410,7 +461,7 @@ namespace Master.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.HasOne("Master.Application.Models.AppUser", null)
+                    b.HasOne("Master.Domain.Models.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -419,7 +470,7 @@ namespace Master.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
-                    b.HasOne("Master.Application.Models.AppUser", null)
+                    b.HasOne("Master.Domain.Models.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -434,7 +485,7 @@ namespace Master.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Master.Application.Models.AppUser", null)
+                    b.HasOne("Master.Domain.Models.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -443,21 +494,25 @@ namespace Master.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.HasOne("Master.Application.Models.AppUser", null)
+                    b.HasOne("Master.Domain.Models.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Master.Application.Models.AppUser", b =>
+            modelBuilder.Entity("Master.Domain.Models.AppUser", b =>
                 {
+                    b.Navigation("GivenRatings");
+
                     b.Navigation("JobPosts");
+
+                    b.Navigation("ReceivedRatings");
 
                     b.Navigation("UserSkills");
                 });
 
-            modelBuilder.Entity("Master.Application.Models.Skill", b =>
+            modelBuilder.Entity("Master.Domain.Models.Skill", b =>
                 {
                     b.Navigation("JobPosts");
 

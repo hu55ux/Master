@@ -1,8 +1,8 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Master.Application.DTOs;
 using Master.Application.Features.Authorization.Commands.LoginUser;
 using Master.Application.Interfaces;
-using Master.Application.Models;
+using Master.Domain.Models;
 using Master.Application.Services;
 using Moq;
 namespace Master.UnitTests.Features.Authorization;

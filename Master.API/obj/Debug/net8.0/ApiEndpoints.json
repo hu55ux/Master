@@ -401,6 +401,75 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "Master.API.Controllers.MasterRatingController",
+    "Method": "Create",
+    "RelativePath": "api/MasterRating",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "Master.Application.DTOs.CreateMasterRatingDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Master.API.Controllers.MasterRatingController",
+    "Method": "Update",
+    "RelativePath": "api/MasterRating",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "Master.Application.DTOs.UpdateMasterRatingDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Master.API.Controllers.MasterRatingController",
+    "Method": "GetByMasterId",
+    "RelativePath": "api/MasterRating/{masterId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "masterId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Master.API.Controllers.MasterRatingController",
+    "Method": "Delete",
+    "RelativePath": "api/MasterRating/{masterId}/{customerId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "masterId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "customerId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Master.API.Controllers.SkillController",
     "Method": "Create",
     "RelativePath": "api/Skill",

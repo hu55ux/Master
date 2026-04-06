@@ -1,4 +1,4 @@
-﻿using Hangfire;
+using Hangfire;
 using Master.API.Middleware;
 using Master.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +42,6 @@ namespace Master.API.Extensions
             app.UseAuthentication();
             app.UseAuthorization();
 
-            // Hangfire-da xəta olmaması üçün bazaya qoşulduğundan əmin olmalıyıq
             app.UseHangfireDashboard("/hangfire", new DashboardOptions
             {
                 Authorization = new[] { new HangfireAdminAuthorizationFilter() },
@@ -74,11 +73,13 @@ namespace Master.API.Extensions
                 await RoleSeeder.SeedRolesAsync(serviceProvider);
 
                 await RoleSeeder.SeedSkillsAndUsersAsync(serviceProvider);
+
+                await RoleSeeder.SeedRatingsAsync(serviceProvider);
             }
             catch (Exception ex)
             {
                 var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-                logger.LogError(ex, "Baza yaradılarkən və ya Seed edilərkən xəta baş verdi.");
+                logger.LogError(ex, "An error occurred while seeding the database.");
                 throw;
             }
         }

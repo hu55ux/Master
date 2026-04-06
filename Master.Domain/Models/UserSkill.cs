@@ -1,4 +1,4 @@
-﻿namespace Master.Application.Models;
+namespace Master.Domain.Models;
 
 /// <summary>
 /// Represents the relationship between a user and a skill.

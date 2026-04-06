@@ -1,5 +1,4 @@
-﻿using Master.Application.DTOs;
-using Master.Application.Models;
+using Master.Domain.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace Master.Application.Interfaces;

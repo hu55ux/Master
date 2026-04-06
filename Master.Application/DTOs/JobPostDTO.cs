@@ -1,4 +1,4 @@
-﻿using Master.Application.Models;
+using Master.Domain.Models;
 
 namespace Master.Application.DTOs
 {
@@ -112,6 +112,9 @@ namespace Master.Application.DTOs
     }
 }
 
+/// <summary>
+/// Represents the query parameters for filtering and paginating job posts.
+/// </summary>
 public class JobPostQuery
 {
     /// <summary>

@@ -1,4 +1,4 @@
-﻿namespace Master.Application.Models;
+namespace Master.Domain.Models;
 
 /// <summary>
 /// Represents a skill that can be associated with users and job posts.

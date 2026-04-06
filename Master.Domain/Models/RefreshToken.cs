@@ -1,4 +1,4 @@
-﻿namespace Master.Application.Models;
+namespace Master.Domain.Models;
 
 /// <summary>
 /// Represents a refresh token used for generating new access tokens in JWT authentication.
