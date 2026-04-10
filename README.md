@@ -1,4 +1,4 @@
-[README.md](https://github.com/user-attachments/files/26632683/README.md)
+[README.md](https://github.com/user-attachments/files/26632796/README.md)
 # 🔧 Master — Service-Worker Marketplace API
 
 **Master** is a full-featured RESTful API for a service-worker marketplace platform, built with **ASP.NET Core 8** and following **Clean Architecture** principles. It connects **Clients** (who need services) with **Masters** (skilled professionals), enabling job posting, skill management, and a rating & review system.
@@ -40,7 +40,7 @@ Master/
 | **CQRS** | MediatR |
 | **Background Jobs** | Hangfire (token cleanup) |
 | **API Docs** | Swagger / OpenAPI |
-| **Containerization** | Docker |
+| **CI/CD** | GitHub Actions → Azure Web App |
 
 ---
 
@@ -192,17 +192,8 @@ await app.EnsureSeededAsync();
 ```
 This will create:
 - Default Admin, 20 Masters, and 20 Clients
-- 10 predefined skills
-- Random job posts and ratings
-
----
-
-## 🐳 Docker
-
-```bash
-docker build -t master-api .
-docker run -p 8080:8080 master-api
-```
+- 10 predefined skills (Plumbing, Electrical Repair, Painting, etc.)
+- Random job posts and ratings with comments
 
 ---
 
