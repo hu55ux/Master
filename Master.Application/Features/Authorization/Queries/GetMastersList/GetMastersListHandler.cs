@@ -32,7 +32,6 @@ public class GetMastersListHandler : IRequestHandler<GetMastersListQuery, PagedR
             "rank");
         
         var dtos = new List<AuthResponseDTO>();
-        
         foreach (var master in pagedResults.Items)
         {
             var dto = _mapper.Map<AuthResponseDTO>(master);

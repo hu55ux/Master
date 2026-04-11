@@ -1,5 +1,4 @@
 ﻿using Master.Application.Interfaces;
-using Master.Application.Services;
 using MediatR;
 
 namespace Master.Application.Features.Authorization.Commands.RevokeToken;

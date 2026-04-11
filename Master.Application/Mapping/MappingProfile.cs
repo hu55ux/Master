@@ -83,7 +83,8 @@ namespace Master.Application.Mapping
                     src.Master != null ? $"{src.Master.FirstName} {src.Master.LastName}" : "Unknown Master"))
                 // Müştərinin adı
                 .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src =>
-                    src.Customer != null ? $"{src.Customer.FirstName} {src.Customer.LastName}" : "Unknown Customer"));
+                    src.Customer != null ? $"{src.Customer.FirstName} {src.Customer.LastName}" : "Unknown Customer"))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
         }
     }
 }

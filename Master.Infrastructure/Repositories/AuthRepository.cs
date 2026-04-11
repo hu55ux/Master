@@ -8,12 +8,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Master.Infrastructure.Repositories;
 
+/// <summary>
+/// Repository implementation for authentication and user management operations.
+/// </summary>
 public class AuthRepository : IAuthRepository
 {
     private readonly MasterDbContext _context;
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AuthRepository"/> class.
+    /// </summary>
     public AuthRepository(MasterDbContext context, UserManager<AppUser> userManager, RoleManager<IdentityRole<Guid>> roleManager)
     {
         _context = context;
@@ -21,15 +27,19 @@ public class AuthRepository : IAuthRepository
         _roleManager = roleManager;
     }
 
+    /// <inheritdoc />
     public async Task<AppUser?> GetByEmailAsync(string email)
         => await _userManager.FindByEmailAsync(email);
 
+    /// <inheritdoc />
     public async Task<AppUser?> GetByIdAsync(Guid id, CancellationToken ct)
         => await _context.Users.FindAsync(new object[] { id }, ct);
 
+    /// <inheritdoc />
     public async Task<AppUser?> GetByIdAsync(string id)
          => await _userManager.FindByIdAsync(id);
 
+    /// <inheritdoc />
     public async Task<IdentityResult> ChangePasswordAsync(AppUser user, string currentPassword, string newPassword)
         => await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
 
@@ -102,8 +112,6 @@ public class AuthRepository : IAuthRepository
 
         var query = _context.Users
             .Where(u => _context.UserRoles.Any(ur => ur.UserId == u.Id && ur.RoleId == role.Id))
-            .Include(u => u.UserSkills)
-                .ThenInclude(us => us.Skill)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))

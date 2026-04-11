@@ -5,28 +5,38 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Master.Infrastructure.Repositories;
 
+/// <summary>
+/// Repository implementation for job post related operations.
+/// </summary>
 public class JobPostRepository : IJobPostRepository
 {
     private readonly MasterDbContext _context;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="JobPostRepository"/> class.
+    /// </summary>
     public JobPostRepository(MasterDbContext context) => _context = context;
 
+    /// <inheritdoc />
     public async Task<JobPost?> GetByIdAndCustomerIdAsync(Guid jobId, Guid customerId, CancellationToken ct)
     {
         return await _context.JobPosts
             .FirstOrDefaultAsync(j => j.Id == jobId && j.CustomerId == customerId, ct);
     }
 
+    /// <inheritdoc />
     public void Update(JobPost job)
     {
         _context.JobPosts.Update(job);
     }
 
+    /// <inheritdoc />
     public async Task<bool> SaveChangesAsync(CancellationToken ct)
     {
         return await _context.SaveChangesAsync(ct) > 0;
     }
 
+    /// <inheritdoc />
     public async Task AddAsync(JobPost job, CancellationToken ct)
     {
         await _context.JobPosts.AddAsync(job, ct);
@@ -36,7 +46,7 @@ public class JobPostRepository : IJobPostRepository
     {
         await _context.Entry(job).Reference(j => j.Customer).LoadAsync(ct);
 
-        if (job.RequiredSkillId != Guid.Empty && job.RequiredSkillId != null)
+        if (job.RequiredSkillId != Guid.Empty && job?.RequiredSkillId != null)
         {
             await _context.Entry(job).Reference(j => j.RequiredSkill).LoadAsync(ct);
         }
@@ -109,7 +119,7 @@ public class JobPostRepository : IJobPostRepository
             jobQuery = jobQuery.Where(j =>
                 j.Title.Contains(term) ||
                 j.Description.Contains(term) ||
-                j.Customer.UserName.Contains(term));
+                j.Customer!.UserName!.Contains(term));
         }
 
         if (query.Status.HasValue)

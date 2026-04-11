@@ -32,7 +32,6 @@ public class GetClientsListHandler : IRequestHandler<GetClientsListQuery, PagedR
             "name");
         
         var dtos = new List<AuthResponseDTO>();
-        
         foreach (var client in pagedResults.Items)
         {
             var dto = _mapper.Map<AuthResponseDTO>(client);

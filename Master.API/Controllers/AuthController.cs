@@ -162,8 +162,15 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<PagedResult<AuthResponseDTO>>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<PagedResult<AuthResponseDTO>>>> GetAllMasters([FromQuery] UserQuery query)
     {
-        var result = await _mediator.Send(new GetMastersListQuery(query));
-        return Ok(ApiResponse<PagedResult<AuthResponseDTO>>.SuccessResponse(result, "Masters retrieved successfully."));
+        try 
+        {
+            var result = await _mediator.Send(new GetMastersListQuery(query));
+            return Ok(ApiResponse<PagedResult<AuthResponseDTO>>.SuccessResponse(result, "Masters retrieved successfully."));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(400, ApiResponse<PagedResult<AuthResponseDTO>>.ErrorResponse($"Error in GetAllMasters: {ex.Message} -> {ex.InnerException?.Message}"));
+        }
     }
 
     /// <summary>
@@ -176,7 +183,15 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<PagedResult<AuthResponseDTO>>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<PagedResult<AuthResponseDTO>>>> GetAllClients([FromQuery] UserQuery query)
     {
-        var result = await _mediator.Send(new GetClientsListQuery(query));
-        return Ok(ApiResponse<PagedResult<AuthResponseDTO>>.SuccessResponse(result, "Clients retrieved successfully."));
+        try 
+        {
+            var result = await _mediator.Send(new GetClientsListQuery(query));
+            return Ok(ApiResponse<PagedResult<AuthResponseDTO>>.SuccessResponse(result, "Clients retrieved successfully."));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(400, ApiResponse<PagedResult<AuthResponseDTO>>.ErrorResponse($"Error in GetAllClients: {ex.Message} -> {ex.InnerException?.Message}"));
+        }
     }
+
 }

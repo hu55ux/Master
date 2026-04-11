@@ -86,4 +86,9 @@ public class MasterRatingResponseDTO
     /// Gets or sets the comment for the rating.
     /// </summary>
     public string? Comment { get; set; }
+
+    /// <summary>
+    /// Gets or sets the date when the rating was created.
+    /// </summary>
+    public DateTime CreatedAt { get; set; }
 }

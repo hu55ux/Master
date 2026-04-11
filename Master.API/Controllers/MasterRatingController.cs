@@ -3,7 +3,7 @@ using Master.Application.DTOs;
 using Master.Application.Features.MasterRatings.Commands.CreateRating;
 using Master.Application.Features.MasterRatings.Commands.DeleteRating;
 using Master.Application.Features.MasterRatings.Commands.UpdateRating;
-using Master.Application.Features.MasterRatings.Queries.GetRatings;
+using Master.Application.Features.MasterRatings.Queries.GetRatingsByUserId;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -78,13 +78,28 @@ public class MasterRatingController : ControllerBase
     /// </summary>
     /// <param name="masterId">The ID of the master.</param>
     /// <returns>A list of ratings with customer details.</returns>
-    [HttpGet("{masterId}")]
+    [HttpGet("{masterId:guid}")]
     public async Task<IActionResult> GetByMasterId(Guid masterId)
     {
-        var result = await _mediator.Send(new GetMasterRatingsQuery(masterId));
+        var result = await _mediator.Send(new GetMasterRatingsByUserIdQuery(masterId));
         if (result != null)
             return Ok(ApiResponse<List<MasterRatingResponseDTO>>.SuccessResponse(result));
             
         return NotFound(ApiResponse<List<MasterRatingResponseDTO>>.ErrorResponse("Ratings not found for the specified master."));
+    }
+
+    /// <summary>
+    /// Fetches all ratings and comments for a specific user (master).
+    /// </summary>
+    /// <param name="userId">The ID of the user.</param>
+    /// <returns>A list of ratings with customer details.</returns>
+    [HttpGet("user/{userId:guid}")]
+    public async Task<IActionResult> GetByUserId(Guid userId)
+    {
+        var result = await _mediator.Send(new GetMasterRatingsByUserIdQuery(userId));
+        if (result != null)
+            return Ok(ApiResponse<List<MasterRatingResponseDTO>>.SuccessResponse(result));
+
+        return NotFound(ApiResponse<List<MasterRatingResponseDTO>>.ErrorResponse("Ratings not found for the specified user."));
     }
 }

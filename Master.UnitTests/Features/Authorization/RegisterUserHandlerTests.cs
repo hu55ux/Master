@@ -4,7 +4,6 @@ using Master.Application.DTOs;
 using Master.Application.Features.Authorization.Commands.RegisterUser;
 using Master.Application.Interfaces;
 using Master.Domain.Models;
-using Master.Application.Services;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 

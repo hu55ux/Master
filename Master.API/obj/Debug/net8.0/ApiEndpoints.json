@@ -542,6 +542,22 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "Master.API.Controllers.MasterRatingController",
+    "Method": "GetByUserId",
+    "RelativePath": "api/MasterRating/user/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "Master.API.Controllers.SkillController",
     "Method": "Create",
     "RelativePath": "api/Skill",
@@ -727,6 +743,32 @@
     "ReturnTypes": [
       {
         "Type": "Master.Application.Common.ApiResponse\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Master.API.Controllers.SkillController",
+    "Method": "GetSkillsByUserId",
+    "RelativePath": "api/Skill/user/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Master.Application.Common.ApiResponse\u00601[[System.Collections.Generic.IEnumerable\u00601[[Master.Application.DTOs.SkillResponseDTO, Master.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",

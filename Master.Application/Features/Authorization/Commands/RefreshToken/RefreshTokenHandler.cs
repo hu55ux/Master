@@ -1,7 +1,6 @@
 ﻿using System.Security.Claims;
 using Master.Application.DTOs;
 using Master.Application.Interfaces;
-using Master.Application.Services;
 using MediatR;
 
 namespace Master.Application.Features.Authorization.Commands.RefreshToken;

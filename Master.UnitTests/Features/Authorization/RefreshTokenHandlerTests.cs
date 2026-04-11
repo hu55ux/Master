@@ -4,7 +4,6 @@ using Master.Application.DTOs;
 using Master.Application.Features.Authorization.Commands.RefreshToken;
 using Master.Application.Interfaces;
 using Master.Domain.Models;
-using Master.Application.Services;
 using Moq;
 
 namespace Master.UnitTests.Features.Authorization;

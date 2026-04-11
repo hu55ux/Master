@@ -7,7 +7,6 @@ using Hangfire;
 using Master.Application.Interfaces;
 using Master.Application.Mapping;
 using Master.Domain.Models;
-using Master.Application.Services;
 using Master.Application.Validators;
 using Master.Domain.Constants;
 using Master.Infrastructure.BackgroundJobs;

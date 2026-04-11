@@ -2,12 +2,16 @@ using AutoMapper;
 using Master.Application.DTOs;
 using Master.Application.Interfaces;
 using Master.Domain.Models;
-using Master.Application.Services;
+using Master.Application.Interfaces;
 using MediatR;
 using Master.Domain.Constants;
 
 namespace Master.Application.Features.Authorization.Commands.RegisterUser;
 
+/// <summary>
+/// Handler for the <see cref="RegisterUserCommand"/>.
+/// Responsible for user creation, role assignment, and token generation.
+/// </summary>
 public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResponseDTO>
 {
     private readonly IAuthRepository _authRepository;
@@ -21,6 +25,13 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResp
         _tokenService = tokenService;
     }
 
+    /// <summary>
+    /// Handles the user registration process.
+    /// </summary>
+    /// <param name="request">The registration command.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>An <see cref="AuthResponseDTO"/> containing tokens and user information.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the user already exists or creation fails.</exception>
     public async Task<AuthResponseDTO> Handle(RegisterUserCommand request, CancellationToken ct)
     {
         var existingUser = await _authRepository.GetByEmailAsync(request.Request.Email);

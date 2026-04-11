@@ -5,15 +5,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Master.Infrastructure.Repositories;
 
+/// <summary>
+/// Repository implementation for skill related operations.
+/// </summary>
 public class SkillRepository : ISkillRepository
 {
     private readonly MasterDbContext _context;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SkillRepository"/> class.
+    /// </summary>
     public SkillRepository(MasterDbContext context) => _context = context;
 
+    /// <inheritdoc />
     public async Task<bool> MasterExistsAsync(Guid masterId, CancellationToken ct)
         => await _context.Users.AnyAsync(u => u.Id == masterId, ct);
 
+    /// <inheritdoc />
     public async Task<List<Guid>> GetValidSkillIdsAsync(List<Guid> skillIds, CancellationToken ct)
         => await _context.Skills
             .Where(s => skillIds.Contains(s.Id))

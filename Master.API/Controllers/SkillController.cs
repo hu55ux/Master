@@ -8,7 +8,7 @@ using Master.Application.Features.Skills.Commands.CreateSkill;
 using Master.Application.Features.Skills.Commands.RemoveSkill;
 using Master.Application.Features.Skills.Commands.UpdateSkill;
 using Master.Application.Features.Skills.Queries.GetAllSkills;
-using Master.Application.Features.Skills.Queries.GetMySkilss;
+using Master.Application.Features.Skills.Queries.GetSkillsByUserId;
 using Master.Application.Features.Skills.Queries.GetPagedResult;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -112,9 +112,20 @@ public class SkillController : ControllerBase
     [HttpGet("my-skills")]
     public async Task<ActionResult<ApiResponse<IEnumerable<SkillResponseDTO>>>> GetMySkills()
     {
-        var result = await _mediator.Send(new GetMySkillsQuery(UserId));
+        var result = await _mediator.Send(new GetSkillsByUserIdQuery(UserId));
         return Ok(ApiResponse<IEnumerable<SkillResponseDTO>>.SuccessResponse(result));
     }
 
-    //[HttpGet("byUser/{userId:guid}")]
+    /// <summary>
+    /// Gets skills for a specific user.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    [HttpGet("user/{userId:guid}")]
+    [AllowAnonymous] // Allow viewing skills on public profiles
+    public async Task<ActionResult<ApiResponse<IEnumerable<SkillResponseDTO>>>> GetSkillsByUserId(Guid userId)
+    {
+        var result = await _mediator.Send(new GetSkillsByUserIdQuery(userId));
+        return Ok(ApiResponse<IEnumerable<SkillResponseDTO>>.SuccessResponse(result));
+    }
 }

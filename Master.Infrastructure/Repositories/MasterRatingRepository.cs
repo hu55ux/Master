@@ -5,20 +5,28 @@ using Master.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 namespace Master.Infrastructure.Repositories;
 
+/// <summary>
+/// Repository implementation for master rating related operations.
+/// </summary>
 public class MasterRatingRepository : IMasterRatingRepository
 {
     private readonly MasterDbContext _context;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MasterRatingRepository"/> class.
+    /// </summary>
     public MasterRatingRepository(MasterDbContext context)
     {
         _context = context;
     }
 
+    /// <inheritdoc />
     public async Task AddAsync(MasterRating rating, CancellationToken ct)
     {
         await _context.MasterRatings.AddAsync(rating, ct);
     }
 
+    /// <inheritdoc />
     public async Task<bool> AlreadyRatedAsync(Guid masterId, Guid clientId, CancellationToken ct)
     {
         return await _context.MasterRatings
