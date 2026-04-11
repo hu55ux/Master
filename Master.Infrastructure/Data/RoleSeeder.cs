@@ -67,6 +67,12 @@ public static class RoleSeeder
         "The quality of work was extremely disappointing."
     };
 
+    private static readonly string[] Locations =
+    {
+        "Yasamal", "Nasimi", "Narimanov", "Nizami", "Khatai",
+        "Sabail", "Surakhani", "Binagadi", "Khazar", "Garadagh"
+    };
+
     /// <summary>
     /// Constructs the initial roles ("Admin", "User") and a default admin user with the email "
     /// </summary>
@@ -216,6 +222,7 @@ public static class RoleSeeder
                 {
                     Title = title,
                     Description = $"Looking for professional to: {title.ToLower()}",
+                    Location = $"Baku, {Locations[rand.Next(Locations.Length)]}",
                     CustomerId = client.Id,
                     RequiredSkillId = randomSkill.Id,
                     JPStatus = JobPostStatus.Active,

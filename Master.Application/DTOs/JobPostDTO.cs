@@ -18,6 +18,11 @@ namespace Master.Application.DTOs
         public string Description { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets the location of the job.
+        /// </summary>
+        public string Location { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets or sets the budget for the job post.
         /// </summary>
         public decimal Budget { get; set; }
@@ -43,6 +48,11 @@ namespace Master.Application.DTOs
         /// Gets or sets the description of the job post.
         /// </summary>
         public string? Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets the location of the job run.
+        /// </summary>
+        public string? Location { get; set; }
 
         /// <summary>
         /// Gets or sets the budget for the job post.
@@ -74,6 +84,11 @@ namespace Master.Application.DTOs
         /// Gets or sets the description of the job post.
         /// </summary>
         public string Description { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the location of the job.
+        /// </summary>
+        public string Location { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the budget for the job post.

@@ -149,6 +149,10 @@ namespace Master.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("RequiredSkillId")
                         .HasColumnType("uniqueidentifier");
 

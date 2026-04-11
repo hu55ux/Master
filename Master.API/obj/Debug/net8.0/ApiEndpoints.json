@@ -27,6 +27,42 @@
   },
   {
     "ContainingType": "Master.API.Controllers.AuthController",
+    "Method": "GetAllClients",
+    "RelativePath": "api/Auth/clients",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Search",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "PageNumber",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "PageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Master.Application.Common.ApiResponse\u00601[[Master.Application.Common.PagedResult\u00601[[Master.Application.DTOs.AuthResponseDTO, Master.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Master.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Master.API.Controllers.AuthController",
     "Method": "DeleteOwnProfile",
     "RelativePath": "api/Auth/deleteProfile",
     "HttpMethod": "DELETE",
@@ -36,6 +72,32 @@
     "ReturnTypes": [
       {
         "Type": "Master.Application.Common.ApiResponse\u00601[[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Master.API.Controllers.AuthController",
+    "Method": "GetById",
+    "RelativePath": "api/Auth/details",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "Master.Application.DTOs.UserDetailsRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Master.Application.Common.ApiResponse\u00601[[Master.Application.DTOs.AuthResponseDTO, Master.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -73,15 +135,15 @@
   },
   {
     "ContainingType": "Master.API.Controllers.AuthController",
-    "Method": "GetById",
-    "RelativePath": "api/Auth/id/{userId}",
+    "Method": "Login",
+    "RelativePath": "api/Auth/login",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "userId",
-        "Type": "System.Guid",
+        "Name": "request",
+        "Type": "Master.Application.DTOs.LoginRequest",
         "IsRequired": true
       }
     ],
@@ -99,21 +161,31 @@
   },
   {
     "ContainingType": "Master.API.Controllers.AuthController",
-    "Method": "Login",
-    "RelativePath": "api/Auth/login",
-    "HttpMethod": "POST",
+    "Method": "GetAllMasters",
+    "RelativePath": "api/Auth/masters",
+    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "request",
-        "Type": "Master.Application.DTOs.LoginRequest",
-        "IsRequired": true
+        "Name": "Search",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "PageNumber",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "PageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "Master.Application.Common.ApiResponse\u00601[[Master.Application.DTOs.AuthResponseDTO, Master.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "Master.Application.Common.ApiResponse\u00601[[Master.Application.Common.PagedResult\u00601[[Master.Application.DTOs.AuthResponseDTO, Master.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Master.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",

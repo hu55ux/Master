@@ -1,5 +1,6 @@
 using Master.Application.DTOs;
 using Master.Application.Interfaces;
+using Master.Application.Common;
 using Master.Domain.Models;
 using Master.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
@@ -93,4 +94,41 @@ public class AuthRepository : IAuthRepository
 
     public async Task AddToRoleAsync(AppUser user, string roleName)
         => await _userManager.AddToRoleAsync(user, roleName);
+
+    public async Task<PagedResult<AppUser>> GetUsersPagedAsync(string roleName, int pageNumber, int pageSize, string? search, string? orderBy)
+    {
+        var role = await _roleManager.FindByNameAsync(roleName);
+        if (role == null) return PagedResult<AppUser>.Create(new List<AppUser>(), pageNumber, pageSize, 0);
+
+        var query = _context.Users
+            .Where(u => _context.UserRoles.Any(ur => ur.UserId == u.Id && ur.RoleId == role.Id))
+            .Include(u => u.UserSkills)
+                .ThenInclude(us => us.Skill)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.ToLower();
+            query = query.Where(u => 
+                (u.FirstName != null && u.FirstName.ToLower().Contains(search)) || 
+                (u.LastName != null && u.LastName.ToLower().Contains(search)));
+        }
+
+        if (orderBy == "rank")
+        {
+            query = query.OrderByDescending(u => u.AverageRating);
+        }
+        else if (orderBy == "name")
+        {
+            query = query.OrderBy(u => u.FirstName).ThenBy(u => u.LastName);
+        }
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return PagedResult<AppUser>.Create(items, pageNumber, pageSize, totalCount);
+    }
 }

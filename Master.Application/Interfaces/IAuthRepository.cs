@@ -1,3 +1,4 @@
+using Master.Application.Common;
 using Master.Domain.Models;
 using Microsoft.AspNetCore.Identity;
 
@@ -19,5 +20,6 @@ public interface IAuthRepository
     Task<bool> RoleExistsAsync(string roleName);
     Task CreateRoleAsync(string roleName);
     Task AddToRoleAsync(AppUser user, string roleName);
+    Task<PagedResult<AppUser>> GetUsersPagedAsync(string roleName, int pageNumber, int pageSize, string? search, string? orderBy);
     Task SaveChangesAsync(CancellationToken ct);
 }

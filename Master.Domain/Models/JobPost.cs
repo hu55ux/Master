@@ -27,6 +27,12 @@ public class JobPost
     public string Description { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the location of the job.
+    /// </summary>
+    /// <example>Baku, Azerbaijan</example>
+    public string Location { get; set; } = string.Empty;
+
+    /// <summary>
     /// Gets or sets the budget allocated for the job.
     /// </summary>
     /// <remarks>

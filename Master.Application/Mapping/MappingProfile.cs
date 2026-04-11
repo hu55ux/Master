@@ -28,7 +28,8 @@ namespace Master.Application.Mapping
                 .ForMember(dest => dest.RefreshToken, opt => opt.Ignore())
                 .ForMember(dest => dest.ExpiresAt, opt => opt.Ignore())
                 .ForMember(dest => dest.RefreshTokenExpiresAt, opt => opt.Ignore())
-                .ForMember(dest => dest.Roles, opt => opt.Ignore());
+                .ForMember(dest => dest.Roles, opt => opt.Ignore())
+                .ForMember(dest => dest.Skills, opt => opt.MapFrom(src => src.UserSkills.Select(us => us.Skill)));
 
             // Profile editing mapping
             CreateMap<ProfileEditRequest, AppUser>()

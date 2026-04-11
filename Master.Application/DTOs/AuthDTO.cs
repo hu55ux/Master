@@ -154,11 +154,11 @@ public class AuthResponseDTO
     /// </summary>
     public decimal AverageScore { get; set; }
 
-    /// <summary>
-    /// Roles of the user. This property is a collection of 
-    /// strings that represents the roles assigned to the authenticated user.
-    /// </summary>
     public IEnumerable<string> Roles { get; set; } = new List<string>();
+    /// <summary>
+    /// Skills of the user. This property is used to store the skills possessed by the master.
+    /// </summary>
+    public IEnumerable<SkillResponseDTO> Skills { get; set; } = new List<SkillResponseDTO>();
 }
 
 /// <summary>
@@ -231,4 +231,15 @@ public class ChangePasswordRequest
     /// <example>NewSecur3P@ss!</example>
     public string ConfirmNewPassword { get; set; } = string.Empty;
 
+}
+
+/// <summary>
+/// Represents a request to fetch user details by ID.
+/// </summary>
+public class UserDetailsRequest
+{
+    /// <summary>
+    /// The unique identifier of the user to retrieve.
+    /// </summary>
+    public Guid UserId { get; set; }
 }

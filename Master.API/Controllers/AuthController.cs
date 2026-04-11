@@ -8,8 +8,10 @@ using Master.Application.Features.Authorization.Commands.LoginUser;
 using Master.Application.Features.Authorization.Commands.RefreshToken;
 using Master.Application.Features.Authorization.Commands.RegisterUser;
 using Master.Application.Features.Authorization.Commands.RevokeToken;
+using Master.Application.Features.Authorization.Queries.GetClientsList;
+using Master.Application.Features.Authorization.Queries.GetMastersList;
 using Master.Application.Features.Authorization.Queries.GetUserById;
-using Master.Domain.Models;
+using Master.Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -70,15 +72,15 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the authenticated user's profile information. This endpoint retrieves the user's details such as name, email, address, and other relevant information based on their unique identifier (userId).
+    /// Gets a user's profile information by ID.
     /// </summary>
-    /// <param name="userId"></param>
-    /// <returns></returns>
-    [HttpPost("id/{userId:guid}")]
+    /// <param name="request">Request body containing the UserId.</param>
+    /// <returns>User details mapped to AuthResponseDTO.</returns>
+    [HttpPost("details")]
     [ProducesResponseType(typeof(ApiResponse<AuthResponseDTO>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<ApiResponse<AppUser>>> GetById(Guid userId)
+    public async Task<ActionResult<ApiResponse<AuthResponseDTO>>> GetById([FromBody] UserDetailsRequest request)
     {
-        var result = await _mediator.Send(new GetUserByIdQuery(userId));
+        var result = await _mediator.Send(new GetUserByIdQuery(request.UserId));
         return Ok(ApiResponse<AuthResponseDTO>.SuccessResponse(result, "User retrieved successfully."));
     }
 
@@ -148,5 +150,33 @@ public class AuthController : ControllerBase
     {
         await _mediator.Send(new DeleteProfileCommand(UserId));
         return Ok(ApiResponse<string>.SuccessResponse("Profile and all associated data deleted permanently."));
+    }
+
+    /// <summary>
+    /// Retrieves a paged list of all users with the 'Master' role, supporting search and ranking.
+    /// </summary>
+    /// <param name="query">Pagination and search parameters.</param>
+    /// <returns>A paged result of master users.</returns>
+    [HttpGet("masters")]
+    [Authorize(Policy = AuthPolicies.ClientOrAdmin)]
+    [ProducesResponseType(typeof(ApiResponse<PagedResult<AuthResponseDTO>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<PagedResult<AuthResponseDTO>>>> GetAllMasters([FromQuery] UserQuery query)
+    {
+        var result = await _mediator.Send(new GetMastersListQuery(query));
+        return Ok(ApiResponse<PagedResult<AuthResponseDTO>>.SuccessResponse(result, "Masters retrieved successfully."));
+    }
+
+    /// <summary>
+    /// Retrieves a paged list of all users with the 'Client' role, supporting search and name sorting.
+    /// </summary>
+    /// <param name="query">Pagination and search parameters.</param>
+    /// <returns>A paged result of client users.</returns>
+    [HttpGet("clients")]
+    [Authorize(Policy = AuthPolicies.MasterOrAdmin)]
+    [ProducesResponseType(typeof(ApiResponse<PagedResult<AuthResponseDTO>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<PagedResult<AuthResponseDTO>>>> GetAllClients([FromQuery] UserQuery query)
+    {
+        var result = await _mediator.Send(new GetClientsListQuery(query));
+        return Ok(ApiResponse<PagedResult<AuthResponseDTO>>.SuccessResponse(result, "Clients retrieved successfully."));
     }
 }

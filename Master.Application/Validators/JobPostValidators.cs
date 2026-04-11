@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Master.Application.DTOs;
 
 namespace Master.Application.Validators
@@ -21,6 +21,10 @@ namespace Master.Application.Validators
             RuleFor(x => x.Description)
                 .NotEmpty().WithMessage("Description is required.")
                 .MaximumLength(1000).WithMessage("Description cannot exceed 1000 characters.");
+
+            RuleFor(x => x.Location)
+                .NotEmpty().WithMessage("Location is required.")
+                .MaximumLength(200).WithMessage("Location cannot exceed 200 characters.");
 
             RuleFor(x => x.Budget)
                 .GreaterThan(0).WithMessage("Budget must be greater than zero.");
@@ -50,6 +54,11 @@ namespace Master.Application.Validators
                 .NotEmpty().When(x => x.Description != null)
                 .MaximumLength(1000).When(x => x.Description != null)
                 .WithMessage("Description cannot exceed 1000 characters.");
+
+            RuleFor(x => x.Location)
+                .NotEmpty().When(x => x.Location != null)
+                .MaximumLength(200).When(x => x.Location != null)
+                .WithMessage("Location cannot exceed 200 characters.");
 
             RuleFor(x => x.Budget)
                 .GreaterThan(0).When(x => x.Budget.HasValue)

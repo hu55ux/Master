@@ -366,6 +366,7 @@ C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\staticwebassets.bui
 C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\staticwebassets.build.json.cache
 C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\Master.API.csproj.Up2Date
 C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\Master.API.dll
 C:\Users\user\Desktop\C++\Master\Master.API\obj\Debug\net8.0\refint\Master.API.dll
