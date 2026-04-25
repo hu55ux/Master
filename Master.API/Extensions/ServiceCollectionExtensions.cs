@@ -105,6 +105,8 @@ public static class ServiceCollectionExtensions
                     Array.Empty<string>()
                 }
             });
+
+            options.CustomSchemaIds(x => x.FullName);
         });
 
         return services;
@@ -124,10 +126,11 @@ public static class ServiceCollectionExtensions
             options.Password.RequireUppercase = false;
             options.Password.RequireNonAlphanumeric = false;
             options.Password.RequiredLength = 6;
-            options.User.RequireUniqueEmail = true;
         })
         .AddEntityFrameworkStores<MasterDbContext>()
         .AddDefaultTokenProviders();
+
+        services.Configure<AwsConfig>(configuration.GetSection(AwsConfig.SectionName));
 
         return services;
     }
@@ -227,6 +230,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISkillRepository, SkillRepository>();
         services.AddScoped<IJobPostRepository, JobPostRepository>();
         services.AddScoped<IMasterRatingRepository, MasterRatingRepository>();
+        services.AddScoped<IFileService, S3Service>();
 
         return services;
     }
