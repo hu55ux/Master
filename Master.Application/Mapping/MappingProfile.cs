@@ -58,6 +58,17 @@ namespace Master.Application.Mapping
             // Skill -> SkillResponseDTO mapping
             CreateMap<Skill, SkillResponseDTO>();
 
+            // JobOffer -> JobOfferResponseDTO mapping
+            CreateMap<JobOffer, JobOfferResponseDTO>()
+                .ForMember(dest => dest.JobPostTitle, opt => opt.MapFrom(src => src.JobPost != null ? src.JobPost.Title : string.Empty))
+                .ForMember(dest => dest.MasterFirstName, opt => opt.MapFrom(src => src.Master != null ? src.Master.FirstName : string.Empty))
+                .ForMember(dest => dest.MasterLastName, opt => opt.MapFrom(src => src.Master != null ? src.Master.LastName : string.Empty))
+                .ForMember(dest => dest.MasterProfileImageUrl, opt => opt.MapFrom(src => src.Master != null ? src.Master.ProfileImageUrl : null))
+                .ForMember(dest => dest.MasterRating, opt => opt.MapFrom(src => src.Master != null ? src.Master.AverageRating : 0))
+                .ForMember(dest => dest.CustomerFirstName, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.FirstName : string.Empty))
+                .ForMember(dest => dest.CustomerLastName, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.LastName : string.Empty))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+
             // Skill creation mapping
             CreateMap<CreateSkillDTO, Skill>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))

@@ -35,6 +35,11 @@ public class MasterDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Gu
     public DbSet<JobPostImage> JobPostImages => Set<JobPostImage>();
 
     /// <summary>
+    /// Gets or sets the job proposals and offers.
+    /// </summary>
+    public DbSet<JobOffer> JobOffers => Set<JobOffer>();
+
+    /// <summary>
     /// Gets or sets the user-skill relationships.
     /// </summary>
     public DbSet<UserSkill> UserSkills => Set<UserSkill>();

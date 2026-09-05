@@ -253,6 +253,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthRepository, AuthRepository>();
         services.AddScoped<ISkillRepository, SkillRepository>();
         services.AddScoped<IJobPostRepository, JobPostRepository>();
+        services.AddScoped<IJobOfferRepository, JobOfferRepository>();
         services.AddScoped<IMasterRatingRepository, MasterRatingRepository>();
         services.Configure<CloudinaryConfig>(configuration.GetSection(CloudinaryConfig.SectionName));
         services.AddScoped<IFileService, CloudinaryService>();
