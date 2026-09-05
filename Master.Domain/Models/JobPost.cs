@@ -33,6 +33,16 @@ public class JobPost
     public string Location { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the job site's GPS Latitude coordinate.
+    /// </summary>
+    public double? Latitude { get; set; }
+
+    /// <summary>
+    /// Gets or sets the job site's GPS Longitude coordinate.
+    /// </summary>
+    public double? Longitude { get; set; }
+
+    /// <summary>
     /// Gets or sets the budget allocated for the job.
     /// </summary>
     /// <remarks>
@@ -69,6 +79,11 @@ public class JobPost
     /// Navigation property representing the skill required to perform the job.
     /// </summary>
     public Skill? RequiredSkill { get; set; }
+
+    /// <summary>
+    /// Collection of attached image photos hosted on Cloudinary for this job request.
+    /// </summary>
+    public virtual ICollection<JobPostImage> Images { get; set; } = new List<JobPostImage>();
 }
 
 /// <summary>

@@ -24,6 +24,7 @@ namespace Master.Application.Mapping
             // AppUser -> AuthResponseDTO mapping
             CreateMap<AppUser, AuthResponseDTO>()
                 .ForMember(dest => dest.AverageScore, opt => opt.MapFrom(src => src.AverageRating))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
                 .ForMember(dest => dest.AccessToken, opt => opt.Ignore())
                 .ForMember(dest => dest.RefreshToken, opt => opt.Ignore())
                 .ForMember(dest => dest.ExpiresAt, opt => opt.Ignore())
@@ -51,7 +52,8 @@ namespace Master.Application.Mapping
                 .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.CreatedDate))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.JPStatus.ToString()))
                 .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.UserName : null))
-                .ForMember(dest => dest.RequiredSkillName, opt => opt.MapFrom(src => src.RequiredSkill != null ? src.RequiredSkill.Name : null));
+                .ForMember(dest => dest.RequiredSkillName, opt => opt.MapFrom(src => src.RequiredSkill != null ? src.RequiredSkill.Name : null))
+                .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src => src.Images.Select(img => img.ImageUrl)));
 
             // Skill -> SkillResponseDTO mapping
             CreateMap<Skill, SkillResponseDTO>();

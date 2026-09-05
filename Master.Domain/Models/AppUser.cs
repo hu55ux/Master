@@ -1,3 +1,4 @@
+using Master.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace Master.Domain.Models;
@@ -30,6 +31,16 @@ public class AppUser : IdentityUser<Guid>
     public string Address { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the user's current GPS Latitude coordinate.
+    /// </summary>
+    public double? Latitude { get; set; }
+
+    /// <summary>
+    /// Gets or sets the user's current GPS Longitude coordinate.
+    /// </summary>
+    public double? Longitude { get; set; }
+
+    /// <summary>
     /// Gets or sets the user's professional experience in years.
     /// </summary>
     /// <remarks>
@@ -58,6 +69,11 @@ public class AppUser : IdentityUser<Guid>
     public DateTimeOffset? UpdatedAt { get; set; }
 
     /// <summary>
+    /// Gets or sets the user's profile picture URL hosted on Cloudinary CDN.
+    /// </summary>
+    public string? ProfileImageUrl { get; set; }
+
+    /// <summary>
     /// Average rating received by the master, calculated from all ratings given by customers.
     /// </summary>
     public decimal AverageRating { get; set; }
@@ -66,6 +82,11 @@ public class AppUser : IdentityUser<Guid>
     /// Total number of ratings received by the master (Məsələn: 150).
     /// </summary>
     public int RatingCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the current work availability status of the user (Available, Busy, Offline).
+    /// </summary>
+    public MasterStatus Status { get; set; } = MasterStatus.Available;
 
     /// <summary>
     /// Navigation property representing the skills owned by the user.
@@ -94,4 +115,28 @@ public class AppUser : IdentityUser<Guid>
     /// </summary>
     public virtual ICollection<MasterRating> GivenRatings { get; set; } = new List<MasterRating>();
 
+    /// <summary>
+    /// Chat rooms where this user acts as a customer.
+    /// </summary>
+    public virtual ICollection<ChatRoom> ChatRoomsAsCustomer { get; set; } = new List<ChatRoom>();
+
+    /// <summary>
+    /// Chat rooms where this user acts as a seller/master.
+    /// </summary>
+    public virtual ICollection<ChatRoom> ChatRoomsAsSeller { get; set; } = new List<ChatRoom>();
+
+    /// <summary>
+    /// Messages sent by this user across all chat rooms.
+    /// </summary>
+    public virtual ICollection<ChatMessage> SentChatMessages { get; set; } = new List<ChatMessage>();
+
+    /// <summary>
+    /// FCM Device token for sending mobile push notifications (iOS / Android / Web).
+    /// </summary>
+    public string? DeviceToken { get; set; }
+
+    /// <summary>
+    /// Mobile OS platform or device type (e.g. "android", "ios", "web").
+    /// </summary>
+    public string? DeviceType { get; set; }
 }

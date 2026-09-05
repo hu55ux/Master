@@ -80,9 +80,14 @@ public interface IAuthRepository
     Task AddToRoleAsync(AppUser user, string roleName);
 
     /// <summary>
-    /// Retrieves a paged list of users filtered by role, search term, and sorting.
+    /// Retrieves a paged list of users filtered by role, search term, status, and sorting.
     /// </summary>
-    Task<PagedResult<AppUser>> GetUsersPagedAsync(string roleName, int pageNumber, int pageSize, string? search, string? orderBy);
+    Task<PagedResult<AppUser>> GetUsersPagedAsync(string roleName, int pageNumber, int pageSize, string? search, string? orderBy, Master.Domain.Enums.MasterStatus? status = null);
+
+    /// <summary>
+    /// Retrieves all users with their skills for distance and location calculations.
+    /// </summary>
+    Task<List<AppUser>> GetAllUsersAsync(CancellationToken ct);
 
     /// <summary>
     /// Persists all changes to the database.

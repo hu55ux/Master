@@ -166,7 +166,14 @@ public static class ServiceCollectionExtensions
                 OnMessageReceived = context =>
                 {
                     var accessToken = context.Request.Cookies["X-Access-Token"];
-                    if (!string.IsNullOrEmpty(accessToken))
+                    if (string.IsNullOrEmpty(accessToken))
+                    {
+                        accessToken = context.Request.Query["access_token"];
+                    }
+
+                    var path = context.HttpContext.Request.Path;
+                    if (!string.IsNullOrEmpty(accessToken) && 
+                        (path.StartsWithSegments("/hubs") || path.StartsWithSegments("/api")))
                     {
                         context.Token = accessToken;
                     }
@@ -217,10 +224,27 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers AutoMapper and application services (JobPostService, SkillService, AuthService, etc.).
+    /// Registers AutoMapper and application services (JobPostService, SkillService, AuthService, Chat, etc.).
     /// </summary>
-    public static IServiceCollection AddAutoMapperAndOtherServices(this IServiceCollection services)
+    public static IServiceCollection AddAutoMapperAndOtherServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddSignalR();
+
+        // Configure Redis Distributed Cache with fallback to Distributed Memory Cache if connection string is missing
+        var redisConn = configuration.GetConnectionString("Redis");
+        if (!string.IsNullOrEmpty(redisConn))
+        {
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConn;
+                options.InstanceName = "MasterChat_";
+            });
+        }
+        else
+        {
+            services.AddDistributedMemoryCache();
+        }
+
         services.AddAutoMapper(typeof(MappingProfile));
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(MappingProfile).Assembly));
@@ -230,7 +254,16 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISkillRepository, SkillRepository>();
         services.AddScoped<IJobPostRepository, JobPostRepository>();
         services.AddScoped<IMasterRatingRepository, MasterRatingRepository>();
-        services.AddScoped<IFileService, S3Service>();
+        services.Configure<CloudinaryConfig>(configuration.GetSection(CloudinaryConfig.SectionName));
+        services.AddScoped<IFileService, CloudinaryService>();
+
+        // Chat & Push Notification Module Registrations
+        services.AddScoped<IChatRepository, ChatRepository>();
+        services.AddScoped<IRedisChatService, RedisChatService>();
+        services.AddScoped<IPushNotificationService, FirebasePushNotificationService>();
+
+        // Hybrid Location Module Registration
+        services.AddHttpClient<ILocationService, LocationService>();
 
         return services;
     }

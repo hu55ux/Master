@@ -29,7 +29,8 @@ public class GetMastersListHandler : IRequestHandler<GetMastersListQuery, PagedR
             request.Query.PageNumber, 
             request.Query.PageSize, 
             request.Query.Search, 
-            "rank");
+            "rank",
+            request.Query.GetMasterStatus());
         
         var dtos = new List<AuthResponseDTO>();
         foreach (var master in pagedResults.Items)

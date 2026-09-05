@@ -52,6 +52,12 @@ namespace Master.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("DateOfBirth")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("DeviceToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeviceType")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -74,11 +80,17 @@ namespace Master.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -97,11 +109,21 @@ namespace Master.Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ProfileImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("RatingCount")
                         .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Available");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -124,6 +146,84 @@ namespace Master.Infrastructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Master.Domain.Models.ChatMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ChatRoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MessageText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ProductImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProductName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("ProductPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("SentAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SenderId");
+
+                    b.HasIndex("ChatRoomId", "SentAt");
+
+                    b.ToTable("ChatMessages");
+                });
+
+            modelBuilder.Entity("Master.Domain.Models.ChatRoom", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SellerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SellerId");
+
+                    b.HasIndex("CustomerId", "SellerId", "ProductId");
+
+                    b.ToTable("ChatRooms");
                 });
 
             modelBuilder.Entity("Master.Domain.Models.JobPost", b =>
@@ -149,9 +249,15 @@ namespace Master.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
+
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
 
                     b.Property<Guid>("RequiredSkillId")
                         .HasColumnType("uniqueidentifier");
@@ -167,6 +273,29 @@ namespace Master.Infrastructure.Migrations
                     b.HasIndex("RequiredSkillId");
 
                     b.ToTable("JobPosts");
+                });
+
+            modelBuilder.Entity("Master.Domain.Models.JobPostImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("JobPostId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("UploadedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobPostId");
+
+                    b.ToTable("JobPostImages");
                 });
 
             modelBuilder.Entity("Master.Domain.Models.MasterRating", b =>
@@ -397,6 +526,44 @@ namespace Master.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Master.Domain.Models.ChatMessage", b =>
+                {
+                    b.HasOne("Master.Domain.Models.ChatRoom", "ChatRoom")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChatRoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Master.Domain.Models.AppUser", "Sender")
+                        .WithMany("SentChatMessages")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ChatRoom");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("Master.Domain.Models.ChatRoom", b =>
+                {
+                    b.HasOne("Master.Domain.Models.AppUser", "Customer")
+                        .WithMany("ChatRoomsAsCustomer")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Master.Domain.Models.AppUser", "Seller")
+                        .WithMany("ChatRoomsAsSeller")
+                        .HasForeignKey("SellerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Seller");
+                });
+
             modelBuilder.Entity("Master.Domain.Models.JobPost", b =>
                 {
                     b.HasOne("Master.Domain.Models.AppUser", "Customer")
@@ -414,6 +581,17 @@ namespace Master.Infrastructure.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("RequiredSkill");
+                });
+
+            modelBuilder.Entity("Master.Domain.Models.JobPostImage", b =>
+                {
+                    b.HasOne("Master.Domain.Models.JobPost", "JobPost")
+                        .WithMany("Images")
+                        .HasForeignKey("JobPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("JobPost");
                 });
 
             modelBuilder.Entity("Master.Domain.Models.MasterRating", b =>
@@ -507,13 +685,29 @@ namespace Master.Infrastructure.Migrations
 
             modelBuilder.Entity("Master.Domain.Models.AppUser", b =>
                 {
+                    b.Navigation("ChatRoomsAsCustomer");
+
+                    b.Navigation("ChatRoomsAsSeller");
+
                     b.Navigation("GivenRatings");
 
                     b.Navigation("JobPosts");
 
                     b.Navigation("ReceivedRatings");
 
+                    b.Navigation("SentChatMessages");
+
                     b.Navigation("UserSkills");
+                });
+
+            modelBuilder.Entity("Master.Domain.Models.ChatRoom", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Master.Domain.Models.JobPost", b =>
+                {
+                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("Master.Domain.Models.Skill", b =>

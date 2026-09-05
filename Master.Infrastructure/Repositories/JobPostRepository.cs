@@ -85,6 +85,7 @@ public class JobPostRepository : IJobPostRepository
         return await _context.JobPosts
             .Include(j => j.Customer)
             .Include(j => j.RequiredSkill)
+            .Include(j => j.Images)
             .AsNoTracking()
             .ToListAsync(ct);
     }
@@ -93,6 +94,7 @@ public class JobPostRepository : IJobPostRepository
         return await _context.JobPosts
             .Include(j => j.Customer)
             .Include(j => j.RequiredSkill)
+            .Include(j => j.Images)
             .AsNoTracking()
             .FirstOrDefaultAsync(j => j.Id == id, ct);
     }
@@ -101,6 +103,7 @@ public class JobPostRepository : IJobPostRepository
         return await _context.JobPosts
             .Include(j => j.Customer)
             .Include(j => j.RequiredSkill)
+            .Include(j => j.Images)
             .Where(j => j.CustomerId == customerId)
             .AsNoTracking()
             .ToListAsync(ct);
@@ -111,6 +114,7 @@ public class JobPostRepository : IJobPostRepository
         var jobQuery = _context.JobPosts
             .Include(j => j.Customer)
             .Include(j => j.RequiredSkill)
+            .Include(j => j.Images)
             .AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(query.SearchTerm))

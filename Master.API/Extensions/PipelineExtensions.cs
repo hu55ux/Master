@@ -51,6 +51,7 @@ namespace Master.API.Extensions
             app.UseHangfireJobs();
 
             app.MapControllers();
+            app.MapHub<Master.API.Hubs.ChatHub>("/hubs/chat");
 
             return app;
         }

@@ -8,7 +8,7 @@ builder.Services
     .AddDataContext(builder.Configuration)
     .AddIdentityAndDb(builder.Configuration)
     .AddJwtAuthenticationAndAuthorization(builder.Configuration)
-    .AddAutoMapperAndOtherServices()
+    .AddAutoMapperAndOtherServices(builder.Configuration)
     .AddHangfireServices(builder.Configuration);
 
 var app = builder.Build();

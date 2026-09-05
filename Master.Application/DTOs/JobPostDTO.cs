@@ -124,6 +124,11 @@ namespace Master.Application.DTOs
         /// Gets or sets the name of the required skill.
         /// </summary>
         public string RequiredSkillName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Collection of Cloudinary CDN image URLs attached to this job post.
+        /// </summary>
+        public List<string> ImageUrls { get; set; } = new List<string>();
     }
 }
 

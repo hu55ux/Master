@@ -105,7 +105,7 @@ public class AuthRepository : IAuthRepository
     public async Task AddToRoleAsync(AppUser user, string roleName)
         => await _userManager.AddToRoleAsync(user, roleName);
 
-    public async Task<PagedResult<AppUser>> GetUsersPagedAsync(string roleName, int pageNumber, int pageSize, string? search, string? orderBy)
+    public async Task<PagedResult<AppUser>> GetUsersPagedAsync(string roleName, int pageNumber, int pageSize, string? search, string? orderBy, Master.Domain.Enums.MasterStatus? status = null)
     {
         var role = await _roleManager.FindByNameAsync(roleName);
         if (role == null) return PagedResult<AppUser>.Create(new List<AppUser>(), pageNumber, pageSize, 0);
@@ -113,6 +113,11 @@ public class AuthRepository : IAuthRepository
         var query = _context.Users
             .Where(u => _context.UserRoles.Any(ur => ur.UserId == u.Id && ur.RoleId == role.Id))
             .AsQueryable();
+
+        if (status != null)
+        {
+            query = query.Where(u => u.Status == status);
+        }
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -138,5 +143,13 @@ public class AuthRepository : IAuthRepository
             .ToListAsync();
 
         return PagedResult<AppUser>.Create(items, pageNumber, pageSize, totalCount);
+    }
+
+    public async Task<List<AppUser>> GetAllUsersAsync(CancellationToken ct)
+    {
+        return await _context.Users
+            .Include(u => u.UserSkills).ThenInclude(us => us.Skill)
+            .AsNoTracking()
+            .ToListAsync(ct);
     }
 }

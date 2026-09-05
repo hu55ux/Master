@@ -6,6 +6,7 @@ using Master.Application.Features.Authorization.Commands.DeleteProfile;
 using Master.Application.Features.Authorization.Commands.EditProfile;
 using Master.Application.Features.Authorization.Commands.LoginUser;
 using Master.Application.Features.Authorization.Commands.RefreshToken;
+using Master.Application.Features.Authorization.Commands.RegisterDeviceToken;
 using Master.Application.Features.Authorization.Commands.RegisterUser;
 using Master.Application.Features.Authorization.Commands.RevokeToken;
 using Master.Application.Features.Authorization.Queries.GetClientsList;
@@ -162,15 +163,8 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<PagedResult<AuthResponseDTO>>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<PagedResult<AuthResponseDTO>>>> GetAllMasters([FromQuery] UserQuery query)
     {
-        try 
-        {
-            var result = await _mediator.Send(new GetMastersListQuery(query));
-            return Ok(ApiResponse<PagedResult<AuthResponseDTO>>.SuccessResponse(result, "Masters retrieved successfully."));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(400, ApiResponse<PagedResult<AuthResponseDTO>>.ErrorResponse($"Error in GetAllMasters: {ex.Message} -> {ex.InnerException?.Message}"));
-        }
+        var result = await _mediator.Send(new GetMastersListQuery(query));
+        return Ok(ApiResponse<PagedResult<AuthResponseDTO>>.SuccessResponse(result, "Masters retrieved successfully."));
     }
 
     /// <summary>
@@ -183,15 +177,46 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<PagedResult<AuthResponseDTO>>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<PagedResult<AuthResponseDTO>>>> GetAllClients([FromQuery] UserQuery query)
     {
-        try 
-        {
-            var result = await _mediator.Send(new GetClientsListQuery(query));
-            return Ok(ApiResponse<PagedResult<AuthResponseDTO>>.SuccessResponse(result, "Clients retrieved successfully."));
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(400, ApiResponse<PagedResult<AuthResponseDTO>>.ErrorResponse($"Error in GetAllClients: {ex.Message} -> {ex.InnerException?.Message}"));
-        }
+        var result = await _mediator.Send(new GetClientsListQuery(query));
+        return Ok(ApiResponse<PagedResult<AuthResponseDTO>>.SuccessResponse(result, "Clients retrieved successfully."));
     }
 
+    /// <summary>
+    /// Registers or updates the mobile device FCM push notification token for the authenticated user.
+    /// </summary>
+    /// <param name="request">Request containing the mobile device FCM token and platform type (ios/android).</param>
+    [Authorize]
+    [HttpPost("device-token")]
+    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<string>>> RegisterDeviceToken([FromBody] RegisterDeviceTokenRequest request)
+    {
+        await _mediator.Send(new RegisterDeviceTokenCommand(UserId, request));
+        return Ok(ApiResponse<string>.SuccessResponse("Mobile device token registered successfully for push notifications."));
+    }
+
+    /// <summary>
+    /// Uploads or updates the authenticated user's profile picture on Cloudinary CDN.
+    /// </summary>
+    /// <param name="file">The image file (jpg/png/webp) from form data.</param>
+    /// <returns>The secure Cloudinary CDN URL of the uploaded profile picture.</returns>
+    [Authorize]
+    [HttpPost("profile-picture")]
+    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<string>>> UploadProfilePicture(IFormFile file)
+    {
+        var url = await _mediator.Send(new Master.Application.Features.Authorization.Commands.UploadProfilePicture.UploadProfilePictureCommand(UserId, file));
+        return Ok(ApiResponse<string>.SuccessResponse(url, "Profile picture uploaded to Cloudinary successfully."));
+    }
+
+    /// <summary>
+    /// Deletes the authenticated user's profile picture from Cloudinary CDN and clears ProfileImageUrl.
+    /// </summary>
+    [Authorize]
+    [HttpDelete("profile-picture")]
+    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<string>>> DeleteProfilePicture()
+    {
+        await _mediator.Send(new Master.Application.Features.Authorization.Commands.DeleteProfilePicture.DeleteProfilePictureCommand(UserId));
+        return Ok(ApiResponse<string>.SuccessResponse("Profile picture deleted successfully from Cloudinary."));
+    }
 }

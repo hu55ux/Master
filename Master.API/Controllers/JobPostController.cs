@@ -45,10 +45,11 @@ public class JobPostController : ControllerBase
     /// Retrieves a paged list of job posts based on the provided query parameters (Search, Sort, Pagination).
     /// </summary>
     /// <param name="query">The pagination and filter criteria.</param>
-    /// <returns>A paged result containing job post data transfer objects.</returns>
+    /// <returns>A paged result containing job post DTOs.</returns>
     [HttpGet("paged")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetPaged([FromQuery] JobPostQuery query)
+    [ProducesResponseType(typeof(ApiResponse<PagedResult<JobPostResponseDTO>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<PagedResult<JobPostResponseDTO>>>> GetPaged([FromQuery] JobPostQuery query)
     {
         var result = await _mediator.Send(new GetPagedJobPostsQuery(query));
         return Ok(ApiResponse<PagedResult<JobPostResponseDTO>>.SuccessResponse(result));
@@ -60,51 +61,75 @@ public class JobPostController : ControllerBase
     /// <returns>A collection of all job posts.</returns>
     [HttpGet("all")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetAll()
-        => Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(await _mediator.Send(new GetAllJobsQuery())));
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<JobPostResponseDTO>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<JobPostResponseDTO>>>> GetAll()
+    {
+        var result = await _mediator.Send(new GetAllJobsQuery());
+        return Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(result));
+    }
 
     /// <summary>
     /// Retrieves the details of a specific job post by its unique identifier.
     /// </summary>
     /// <param name="id">The unique identifier of the job post.</param>
     /// <returns>The requested job post details.</returns>
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetById(Guid id)
-        => Ok(ApiResponse<JobPostResponseDTO>.SuccessResponse(await _mediator.Send(new GetJobByIdQuery(id))));
+    [ProducesResponseType(typeof(ApiResponse<JobPostResponseDTO>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<JobPostResponseDTO>>> GetById(Guid id)
+    {
+        var result = await _mediator.Send(new GetJobByIdQuery(id));
+        return Ok(ApiResponse<JobPostResponseDTO>.SuccessResponse(result));
+    }
 
     /// <summary>
     /// Gets all job posts created by the currently authenticated user, with an option to filter only active jobs.
     /// </summary>
     [HttpGet("myJobs")]
-    public async Task<IActionResult> GetMyJobs()
-        => Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(await _mediator.Send(new GetJobsByUserIdQuery(UserId, true))));
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<JobPostResponseDTO>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<JobPostResponseDTO>>>> GetMyJobs()
+    {
+        var result = await _mediator.Send(new GetJobsByUserIdQuery(UserId, true));
+        return Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(result));
+    }
 
     /// <summary>
-    /// Get all job posts created by a specific user, with an option to filter only active jobs. This endpoint is accessible without authentication.
+    /// Get all job posts created by a specific user, with an option to filter only active jobs.
     /// </summary>
     [HttpGet("user/{userId:guid}")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetByUserId(Guid userId)
-        => Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(await _mediator.Send(new GetJobsByUserIdQuery(userId, false))));
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<JobPostResponseDTO>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<JobPostResponseDTO>>>> GetByUserId(Guid userId)
+    {
+        var result = await _mediator.Send(new GetJobsByUserIdQuery(userId, false));
+        return Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(result));
+    }
 
     /// <summary>
-    /// Gets the owner (customer) details of a specific job post by its unique identifier. This endpoint is accessible without authentication.
+    /// Gets the owner (customer) details of a specific job post by its unique identifier.
     /// </summary>
-    [HttpGet("{id}/owner")]
+    [HttpGet("{id:guid}/owner")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetOwnerByJob(Guid id)
-        => Ok(ApiResponse<AuthResponseDTO>.SuccessResponse(await _mediator.Send(new GetUserByJobIdQuery(id))));
+    [ProducesResponseType(typeof(ApiResponse<AuthResponseDTO>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<AuthResponseDTO>>> GetOwnerByJob(Guid id)
+    {
+        var result = await _mediator.Send(new GetUserByJobIdQuery(id));
+        return Ok(ApiResponse<AuthResponseDTO>.SuccessResponse(result));
+    }
 
     /// <summary>
     /// Retrieves active job posts filtered by a specific required skill.
     /// </summary>
     /// <param name="skillId">The unique identifier of the required skill.</param>
     /// <returns>A collection of active job posts matching the skill.</returns>
-    [HttpGet("bySkill/{skillId}")]
+    [HttpGet("bySkill/{skillId:guid}")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetBySkill(Guid skillId)
-        => Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(await _mediator.Send(new GetActiveJobsBySkillQuery(skillId))));
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<JobPostResponseDTO>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<JobPostResponseDTO>>>> GetBySkill(Guid skillId)
+    {
+        var result = await _mediator.Send(new GetActiveJobsBySkillQuery(skillId));
+        return Ok(ApiResponse<IEnumerable<JobPostResponseDTO>>.SuccessResponse(result));
+    }
 
     /// <summary>
     /// Creates a new job post for the currently authenticated user.
@@ -112,8 +137,12 @@ public class JobPostController : ControllerBase
     /// <param name="request">The data required to create a job post.</param>
     /// <returns>The details of the newly created job post.</returns>
     [HttpPost("create")]
-    public async Task<IActionResult> Create([FromBody] CreateJobPostDTO request)
-        => Ok(ApiResponse<JobPostResponseDTO>.SuccessResponse(await _mediator.Send(new CreateJobCommand(UserId, request))));
+    [ProducesResponseType(typeof(ApiResponse<JobPostResponseDTO>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<JobPostResponseDTO>>> Create([FromBody] CreateJobPostDTO request)
+    {
+        var result = await _mediator.Send(new CreateJobCommand(UserId, request));
+        return Ok(ApiResponse<JobPostResponseDTO>.SuccessResponse(result, "Job post created successfully."));
+    }
 
     /// <summary>
     /// Updates an existing job post's details. Only the owner can perform this action.
@@ -121,9 +150,13 @@ public class JobPostController : ControllerBase
     /// <param name="id">The unique identifier of the job post to update.</param>
     /// <param name="request">The updated job post information.</param>
     /// <returns>The updated job post details.</returns>
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateJobPostDTO request)
-        => Ok(ApiResponse<JobPostResponseDTO>.SuccessResponse(await _mediator.Send(new UpdateJobCommand(id, UserId, request))));
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponse<JobPostResponseDTO>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<JobPostResponseDTO>>> Update(Guid id, [FromBody] UpdateJobPostDTO request)
+    {
+        var result = await _mediator.Send(new UpdateJobCommand(id, UserId, request));
+        return Ok(ApiResponse<JobPostResponseDTO>.SuccessResponse(result, "Job post updated successfully."));
+    }
 
     /// <summary>
     /// Partially updates the status of a specific job post.
@@ -131,27 +164,65 @@ public class JobPostController : ControllerBase
     /// <param name="id">The unique identifier of the job post.</param>
     /// <param name="newStatus">The new status to be assigned (e.g., Active, Completed, Canceled).</param>
     /// <returns>A boolean value indicating whether the update was successful.</returns>
-    [HttpPatch("{id}/status")]
-    public async Task<IActionResult> ChangeStatus(Guid id, [FromBody] JobPostStatus newStatus)
-        => Ok(ApiResponse<bool>.SuccessResponse(await _mediator.Send(new ChangeJobStatusCommand(id, UserId, newStatus))));
+    [HttpPatch("{id:guid}/status")]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<bool>>> ChangeStatus(Guid id, [FromBody] JobPostStatus newStatus)
+    {
+        var result = await _mediator.Send(new ChangeJobStatusCommand(id, UserId, newStatus));
+        return Ok(ApiResponse<bool>.SuccessResponse(result, "Job status changed successfully."));
+    }
 
     /// <summary>
     /// Deletes a specific job post. Only the owner of the job post is authorized to delete it.
     /// </summary>
     /// <param name="id">The unique identifier of the job post to delete.</param>
     /// <returns>A success message confirming deletion.</returns>
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(Guid id)
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<string>>> Delete(Guid id)
     {
         await _mediator.Send(new DeleteJobCommand(id, UserId));
         return Ok(ApiResponse<string>.SuccessResponse("Job post deleted successfully."));
     }
 
     /// <summary>
-    /// Gets a list of all possible job statuses that can be assigned to a job post. This is useful for populating dropdowns or selection lists in the client application.
+    /// Gets a list of all possible job statuses that can be assigned to a job post (for dropdowns).
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Lookup options for job statuses.</returns>
     [HttpGet("statuses")]
-    public async Task<IActionResult> GetStatuses()
-    => Ok(ApiResponse<List<JobStatusLookupDto>>.SuccessResponse(await _mediator.Send(new GetJobStatusLookupQuery())));
+    [ProducesResponseType(typeof(ApiResponse<List<JobStatusLookupDto>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<List<JobStatusLookupDto>>>> GetStatuses()
+    {
+        var result = await _mediator.Send(new GetJobStatusLookupQuery());
+        return Ok(ApiResponse<List<JobStatusLookupDto>>.SuccessResponse(result));
+    }
+
+    /// <summary>
+    /// Uploads one or multiple photo attachments to Cloudinary for a specific job post.
+    /// </summary>
+    /// <param name="id">The unique identifier of the job post.</param>
+    /// <param name="files">List of image files (jpg/png/webp) from form data.</param>
+    /// <returns>List of uploaded Cloudinary CDN image URLs.</returns>
+    [Authorize]
+    [HttpPost("{id:guid}/images")]
+    [ProducesResponseType(typeof(ApiResponse<List<string>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<List<string>>>> UploadJobPostImages(Guid id, [FromForm] List<IFormFile> files)
+    {
+        var result = await _mediator.Send(new Master.Application.Features.JobPosts.Commands.AddJobPostImages.AddJobPostImagesCommand(id, UserId, files));
+        return Ok(ApiResponse<List<string>>.SuccessResponse(result, "Job post images uploaded to Cloudinary successfully."));
+    }
+
+    /// <summary>
+    /// Deletes a specific photo attachment from a job post and removes it from Cloudinary.
+    /// </summary>
+    /// <param name="id">The unique identifier of the job post.</param>
+    /// <param name="imageId">The unique identifier of the image attachment to delete.</param>
+    [Authorize]
+    [HttpDelete("{id:guid}/images/{imageId:guid}")]
+    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<string>>> DeleteJobPostImage(Guid id, Guid imageId)
+    {
+        await _mediator.Send(new Master.Application.Features.JobPosts.Commands.DeleteJobPostImage.DeleteJobPostImageCommand(id, imageId, UserId));
+        return Ok(ApiResponse<string>.SuccessResponse("Job post image deleted successfully from Cloudinary."));
+    }
 }

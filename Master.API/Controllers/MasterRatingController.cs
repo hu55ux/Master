@@ -31,7 +31,9 @@ public class MasterRatingController : ControllerBase
     /// <returns>True if successfully created.</returns>
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> Create([FromBody] CreateMasterRatingDTO model)
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ApiResponse<bool>>> Create([FromBody] CreateMasterRatingDTO model)
     {
         var result = await _mediator.Send(new CreateMasterRatingCommand(model));
         if (result)
@@ -47,7 +49,9 @@ public class MasterRatingController : ControllerBase
     /// <returns>True if successfully updated.</returns>
     [HttpPut]
     [Authorize]
-    public async Task<IActionResult> Update([FromBody] UpdateMasterRatingDTO model)
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ApiResponse<bool>>> Update([FromBody] UpdateMasterRatingDTO model)
     {
         var result = await _mediator.Send(new UpdateMasterRatingCommand(model));
         if (result)
@@ -57,14 +61,16 @@ public class MasterRatingController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes a specific rating.
+    /// Deletes a specific rating given to a master by a customer.
     /// </summary>
     /// <param name="masterId">The ID of the master who was rated.</param>
     /// <param name="customerId">The ID of the customer who gave the rating.</param>
     /// <returns>True if successfully deleted.</returns>
-    [HttpDelete("{masterId}/{customerId}")]
+    [HttpDelete("{masterId:guid}/{customerId:guid}")]
     [Authorize]
-    public async Task<IActionResult> Delete(Guid masterId, Guid customerId)
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ApiResponse<bool>>> Delete(Guid masterId, Guid customerId)
     {
         var result = await _mediator.Send(new DeleteMasterRatingCommand(masterId, customerId));
         if (result)
@@ -79,13 +85,11 @@ public class MasterRatingController : ControllerBase
     /// <param name="masterId">The ID of the master.</param>
     /// <returns>A list of ratings with customer details.</returns>
     [HttpGet("{masterId:guid}")]
-    public async Task<IActionResult> GetByMasterId(Guid masterId)
+    [ProducesResponseType(typeof(ApiResponse<List<MasterRatingResponseDTO>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<List<MasterRatingResponseDTO>>>> GetByMasterId(Guid masterId)
     {
         var result = await _mediator.Send(new GetMasterRatingsByUserIdQuery(masterId));
-        if (result != null)
-            return Ok(ApiResponse<List<MasterRatingResponseDTO>>.SuccessResponse(result));
-            
-        return NotFound(ApiResponse<List<MasterRatingResponseDTO>>.ErrorResponse("Ratings not found for the specified master."));
+        return Ok(ApiResponse<List<MasterRatingResponseDTO>>.SuccessResponse(result ?? new List<MasterRatingResponseDTO>()));
     }
 
     /// <summary>
@@ -94,12 +98,10 @@ public class MasterRatingController : ControllerBase
     /// <param name="userId">The ID of the user.</param>
     /// <returns>A list of ratings with customer details.</returns>
     [HttpGet("user/{userId:guid}")]
-    public async Task<IActionResult> GetByUserId(Guid userId)
+    [ProducesResponseType(typeof(ApiResponse<List<MasterRatingResponseDTO>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<List<MasterRatingResponseDTO>>>> GetByUserId(Guid userId)
     {
         var result = await _mediator.Send(new GetMasterRatingsByUserIdQuery(userId));
-        if (result != null)
-            return Ok(ApiResponse<List<MasterRatingResponseDTO>>.SuccessResponse(result));
-
-        return NotFound(ApiResponse<List<MasterRatingResponseDTO>>.ErrorResponse("Ratings not found for the specified user."));
+        return Ok(ApiResponse<List<MasterRatingResponseDTO>>.SuccessResponse(result ?? new List<MasterRatingResponseDTO>()));
     }
 }

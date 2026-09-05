@@ -154,6 +154,16 @@ public class AuthResponseDTO
     /// </summary>
     public decimal AverageScore { get; set; }
 
+    /// <summary>
+    /// User's profile picture Cloudinary CDN URL.
+    /// </summary>
+    public string? ProfileImageUrl { get; set; }
+
+    /// <summary>
+    /// Master's current availability status (Available, Busy, Offline).
+    /// </summary>
+    public string Status { get; set; } = string.Empty;
+
     public IEnumerable<string> Roles { get; set; } = new List<string>();
     /// <summary>
     /// Skills of the user. This property is used to store the skills possessed by the master.

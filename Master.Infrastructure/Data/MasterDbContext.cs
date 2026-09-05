@@ -1,3 +1,4 @@
+using Master.Domain.Enums;
 using Master.Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -29,6 +30,11 @@ public class MasterDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Gu
     public DbSet<JobPost> JobPosts => Set<JobPost>();
 
     /// <summary>
+    /// Gets or sets job post image attachments.
+    /// </summary>
+    public DbSet<JobPostImage> JobPostImages => Set<JobPostImage>();
+
+    /// <summary>
     /// Gets or sets the user-skill relationships.
     /// </summary>
     public DbSet<UserSkill> UserSkills => Set<UserSkill>();
@@ -42,6 +48,16 @@ public class MasterDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Gu
     /// Gets or sets the master ratings given by customers to masters.
     /// </summary>
     public DbSet<MasterRating> MasterRatings => Set<MasterRating>();
+
+    /// <summary>
+    /// Gets or sets the chat rooms for user dialogues.
+    /// </summary>
+    public DbSet<ChatRoom> ChatRooms => Set<ChatRoom>();
+
+    /// <summary>
+    /// Gets or sets the chat messages sent in dialogues.
+    /// </summary>
+    public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
 
     /// <summary>
     /// Configures the schema needed for the Master database context.
@@ -61,6 +77,10 @@ public class MasterDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Gu
             entity.Ignore(u => u.Age);
             entity.Property(u => u.AverageRating).HasPrecision(18, 2);
             entity.Property(u => u.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(u => u.Status)
+                .HasConversion(v => v.Name, v => MasterStatus.FromName(v))
+                .HasMaxLength(20)
+                .HasDefaultValue(MasterStatus.Available);
         });
 
         // UserSkill configuration (many-to-many between User and Skill)
@@ -124,5 +144,47 @@ public class MasterDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Gu
             .WithMany(u => u.GivenRatings)
             .HasForeignKey(r => r.CustomerId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // ChatRoom Configuration
+        builder.Entity<ChatRoom>(room =>
+        {
+            room.HasKey(cr => cr.Id);
+
+            room.HasOne(cr => cr.Customer)
+                .WithMany(u => u.ChatRoomsAsCustomer)
+                .HasForeignKey(cr => cr.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            room.HasOne(cr => cr.Seller)
+                .WithMany(u => u.ChatRoomsAsSeller)
+                .HasForeignKey(cr => cr.SellerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            room.HasIndex(cr => new { cr.CustomerId, cr.SellerId, cr.ProductId });
+        });
+
+        // ChatMessage Configuration
+        builder.Entity<ChatMessage>(msg =>
+        {
+            msg.HasKey(m => m.Id);
+
+            msg.Property(m => m.Type)
+               .HasConversion<string>();
+
+            msg.Property(m => m.ProductPrice)
+               .HasPrecision(18, 2);
+
+            msg.HasOne(m => m.ChatRoom)
+               .WithMany(cr => cr.Messages)
+               .HasForeignKey(m => m.ChatRoomId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+            msg.HasOne(m => m.Sender)
+               .WithMany(u => u.SentChatMessages)
+               .HasForeignKey(m => m.SenderId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            msg.HasIndex(m => new { m.ChatRoomId, m.SentAt });
+        });
     }
 }
